@@ -33,6 +33,7 @@
 
 #include <uk/config.h>
 #include <uk/arch/paging.h>
+#include <uk/config.h>
 
 #define PTE_RO		X86_PTE_PRESENT
 #define PTE_RW		(X86_PTE_PRESENT | X86_PTE_RW)
@@ -85,19 +86,14 @@
 .ifle \pages
 	.exitm
 .endif
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 0), \lvl, \pte
-.ifgt \pages - 8
-	/* Have to do some unrolling to not exceed max nested macros */
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 1), \lvl, \pte
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 2), \lvl, \pte
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 3), \lvl, \pte
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 4), \lvl, \pte
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 5), \lvl, \pte
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 6), \lvl, \pte
-	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 7), \lvl, \pte
-	pte_fill (\paddr + PAGE_Lx_SIZE(\lvl) * 8), (\pages - 8), \lvl, \pte
+.ifeq (\pages % 2)
+	pte_fill (\paddr + PAGE_Lx_SIZE(\lvl) * 0           ), (\pages / 2), \lvl, \pte
+	pte_fill (\paddr + PAGE_Lx_SIZE(\lvl) * (\pages / 2)), (\pages / 2), \lvl, \pte
 .else
-	pte_fill (\paddr + PAGE_Lx_SIZE(\lvl) * 1), (\pages - 1), \lvl, \pte
+	pte_page (\paddr + PAGE_Lx_SIZE(\lvl) * 0), \lvl, \pte
+.ifgt \pages - 1
+	pte_fill (\paddr + PAGE_Lx_SIZE(\lvl) * 1           ), (\pages - 1), \lvl, \pte
+.endif
 .endif
 .endm
 
@@ -109,6 +105,18 @@
  */
 .macro pte_zero paddr=0, pages
 	.fill \pages, 0x8, 0
+.endm
+
+/**
+ * Outputs a number of page table directory entries for a continuous mapping starting at
+ * the provided child-table address.
+ *
+ * @param paddr address of the first sub-table to map
+ * @param pages number of pages to map
+ * @param pte additional flags for PTE
+ */
+.macro pte_fill_dir paddr, pages, pte
+	pte_fill \paddr, \pages, PT_LVL, \pte
 .endm
 
 /* x86-64 Boot Page Table
@@ -141,10 +149,23 @@ x86_bpt_pt0_0_0: /* 4K pages */
 	pte_fill 0x00000000000e0000, 0x020, PT_LVL, PTE_RO
 	pte_fill 0x0000000000100000, 0x100, PT_LVL, PTE_RW
 
+#ifdef CONFIG_SMALL_PAGES
+/* fill up to 1GiB of 4KiB pages (for Jump-Guard)
+ */
+.align 0x1000
+x86_bpt_pt0_0_1_:
+	pte_fill 0x0000000000200000, 0x200*0x1ff, PT_LVL, PTE_RW
+#endif
+
 .align 0x1000
 x86_bpt_pd0_0: /* 2M pages */
 	pte	 x86_bpt_pt0_0_0, PTE_RW
+
+#ifdef CONFIG_SMALL_PAGES
+	pte_fill_dir x86_bpt_pt0_0_1_, 0x1ff, PTE_RW
+#else
 	pte_fill 0x0000000000200000, 0x1ff, PD_LVL, PTE_RW
+#endif
 
 x86_bpt_pd0_1: /* 2M pages */
 	pte_fill 0x0000000040000000, 0x200, PD_LVL, PTE_RW

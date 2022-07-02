@@ -167,4 +167,9 @@ config UKPLAT_ALLOW_GIC
 	bool
 	default y
 
+config SMALL_PAGES
+       bool "Use only small memory pages (x86-64 only)"
+       default n
+       depends on ARCH_X86_64
+
 endif
