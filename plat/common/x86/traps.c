@@ -97,6 +97,9 @@ void do_page_fault(struct __regs *regs, unsigned long error_code)
 	if (uk_raise_event(UKARCH_TRAP_PAGE_FAULT, &ctx))
 		return;
 
+	uk_pr_crit("Unhandled Trap %d (%s), error code=0x%lx\n",
+		   TRAP_page_fault, "page fault", error_code);
+	uk_pr_info("Regs address %p\n", regs);
 	dump_regs(regs);
 #if !__OMIT_FRAMEPOINTER__
 	stack_walk_for_frame(regs->rbp);
