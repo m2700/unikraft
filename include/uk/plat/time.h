@@ -41,6 +41,11 @@
 extern "C" {
 #endif
 
+#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+void ukplat_timestamp_main(void);
+__u64 ukplat_boot_delay_nanos(void);
+#endif // CONFIG_LIBUKBOOT_TIMESTAMP
+
 void ukplat_time_init(void);
 void ukplat_time_fini(void);
 uint32_t ukplat_time_get_irq(void);

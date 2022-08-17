@@ -44,6 +44,15 @@
 #include <kvm/tscclock.h>
 #include <uk/assert.h>
 
+#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+void ukplat_timestamp_main(void) {
+	tscclock_timestamp_main();
+}
+__u64 ukplat_boot_delay_nanos(void) {
+    return tscclock_boot_delay_nanos();
+}
+#endif // CONFIG_LIBUKBOOT_TIMESTAMP
+
 /* return ns since time_init() */
 __nsec ukplat_monotonic_clock(void)
 {

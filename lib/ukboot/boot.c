@@ -281,6 +281,10 @@ void ukplat_entry(int argc, char *argv[])
 	}
 	uk_pr_info("])\n");
 
+#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+	ukplat_timestamp_main();
+#endif
+
 	rc = main(argc, argv);
 	uk_pr_info("main returned %d, halting system\n", rc);
 	rc = (rc != 0) ? UKPLAT_CRASH : UKPLAT_HALT;
