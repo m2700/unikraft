@@ -74,6 +74,8 @@ libname2olib = $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(1)))
 
 libname2preolib = $(addprefix $(BUILD_DIR)/,$(addsuffix .ld.o,$(1)))
 
+libname2bclib = $(addprefix $(BUILD_DIR)/,$(addsuffix .bc,$(1)))
+
 # converts a list of sources to paths pointing to their corresponding destination files
 # src2dst $libname,$source(s),$destsuffix,$variant(optional)
 define src2dst =
@@ -89,10 +91,14 @@ define src2obj =
 $(call src2dst,$(1),$(2),.o,$(3))
 endef
 
+# converts a list of object file paths to paths pointing to their corresponding bitcode file
+# obj2bc $objects
+obj2bc = $(patsubst %.o,%.bc,$(1))
+
 # converts a list of output file (object files or linker scripts) paths
 # to paths pointing to their corresponding dependency file
 # out2dep $objects
-out2dep = $(patsubst %.o,%.d,$(patsubst %.lds,%.lds.d,$(1)))
+out2dep = $(patsubst %.o,%.d,$(patsubst %.lds,%.lds.d,$(patsubst %.bc,%.bc.d,$(1))))
 
 # converts a list of sources (.S, .c, .cc, .cpp) to paths pointing to their corresponding dependency file
 # src2dep $libname,$source(s),$variant(optional)
@@ -563,13 +569,36 @@ $(4): $(2) | preprocess
 		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
 		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
 		       -c $(2) -o $(4) $(call depflags,$(4))
-)
+	)
+
+$(call obj2bc,$(4)): $(2) | preprocess
+	$(call build_cmd_fixdep,CC-BC,$(1),$(call obj2bc,$(4)),\
+		$(CC)  -emit-llvm \
+		       $$(COMPFLAGS) $$(COMPFLAGS-y) \
+		       $$($(call vprefix_lib,$(1),COMPFLAGS)) $$($(call vprefix_lib,$(1),COMPFLAGS-y)) \
+		       $$(CINCLUDES) $$(CINCLUDES-y) \
+		       $$($(call vprefix_lib,$(1),CINCLUDES)) $$($(call vprefix_lib,$(1),CINCLUDES-y)) \
+		       $$($(call vprefix_src,$(1),$(2),$(3),INCLUDES)) $$($(call vprefix_src,$(1),$(2),$(3),INCLUDES-y)) \
+		       $$($(call vprefix_glb,$(3),ARCHFLAGS)) $$($(call vprefix_glb,$(3),ARCHFLAGS-y)) \
+		       $$(CFLAGS) $$(CFLAGS-y) $$(CFLAGS_EXTRA) \
+		       $$($(call vprefix_lib,$(1),CFLAGS)) $$($(call vprefix_lib,$(1),CFLAGS-y)) \
+		       $$($(call vprefix_src,$(1),$(2),$(3),FLAGS)) $$($(call vprefix_src,$(1),$(2),$(3),FLAGS-y)) \
+		       $(5) \
+		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
+		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
+		       -c $(2) -o $(call obj2bc,$(4)) $(call depflags,$(call obj2bc,$(4)))
+	)
 
 UK_SRCS-y += $(2)
 UK_DEPS-y += $(call out2dep,$(4))
+UK_DEPS-y += $(call out2dep,$(call obj2bc,$(4)))
 UK_OBJS-y += $(4)
+UK_BC_OBJS-y += $(call obj2bc,$(4))
 $(eval $(call vprefix_lib,$(1),OBJS-y) += $(4))
+$(eval $(call vprefix_lib,$(1),BC_OBJS-y) += $(call obj2bc,$(4)))
 $(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(4)) $(call out2dep,$(4)))
+$(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call obj2bc,$(4))))
+$(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call out2dep,$(call obj2bc,$(4))))
 endef
 
 define buildrule_cxx =
@@ -589,11 +618,33 @@ $(4): $(2) | preprocess
 		       -c $(2) -o $(4) $(call depflags,$(4))
 	)
 
+$(call obj2bc,$(4)): $(2) | preprocess
+	$(call build_cmd_fixdep,CXX-BC,$(1),$(call obj2bc,$(4)),\
+		$(CXX) -emit-llvm \
+		       $$(COMPFLAGS) $$(COMPFLAGS-y) \
+		       $$(CXXINCLUDES) $$(CXXINCLUDES-y) \
+		       $$($(call vprefix_lib,$(1),CXXINCLUDES)) $$($(call vprefix_lib,$(1),CXXINCLUDES-y)) \
+		       $$($(call vprefix_src,$(1),$(2),$(3),INCLUDES)) $$($(call vprefix_src,$(1),$(2),$(3),INCLUDES-y)) \
+		       $$($(call vprefix_glb,$(3),ARCHFLAGS)) $$($(call vprefix_glb,$(3),ARCHFLAGS-y)) \
+		       $$(CXXFLAGS) $$(CXXFLAGS-y) $$(CXXFLAGS_EXTRA) \
+		       $$($(call vprefix_lib,$(1),CXXFLAGS)) $$($(call vprefix_lib,$(1),CXXFLAGS-y)) \
+		       $$($(call vprefix_src,$(1),$(2),$(3),FLAGS)) $$($(call vprefix_src,$(1),$(2),$(3),FLAGS-y)) \
+		       $(5) \
+		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
+		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
+		       -c $(2) -o $(call obj2bc,$(4)) $(call depflags,$(call obj2bc,$(4)))
+	)
+
 UK_SRCS-y += $(2)
 UK_DEPS-y += $(call out2dep,$(4))
+UK_DEPS-y += $(call out2dep,$(call obj2bc,$(4)))
 UK_OBJS-y += $(4)
+UK_BC_OBJS-y += $(call obj2bc,$(4))
 $(eval $(call vprefix_lib,$(1),OBJS-y) += $(4))
+$(eval $(call vprefix_lib,$(1),BC_OBJS-y) += $(call obj2bc,$(4)))
 $(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(4)) $(call out2dep,$(4)))
+$(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call obj2bc,$(4))))
+$(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call out2dep,$(call obj2bc,$(4))))
 endef
 
 # Aliases for C++ sources
@@ -909,10 +960,23 @@ $(call libname2olib,$(1)): $(call libname2preolib,$(1)) \
 		           $$($(call vprefix_lib,$(1),OBJCFLAGS)) $$($(call vprefix_lib,$(1),OBJCFLAGS-y)) \
 			   $(call libname2preolib,$(1)) $(call libname2olib,$(1)))
 
+$(call libname2bclib,$(1)): $($(call vprefix_lib,$(1),BC_OBJS)) \
+			      $($(call vprefix_lib,$(1),BC_OBJS-y)) \
+			      $(EACHOLIB_BC_OBJS) \
+			      $(EACHOLIB_BC_OBJS-y)
+	$(call build_cmd,BCLD,,$(call libname2bclib,$(1)),\
+		$(BCLD) $($(call vprefix_lib,$(1),BC_OBJS)) \
+		        $($(call vprefix_lib,$(1),BC_OBJS-y)) \
+		        $(EACHOLIB_BC_OBJS) \
+		        $(EACHOLIB_BC_OBJS-y) \
+		        -o $(call libname2bclib,$(1)))
+
 $(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call libname2preolib,$(1))))
 $(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call libname2olib,$(1))))
+$(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call libname2bclib,$(1))))
 
 $(1): $(call libname2olib,$(1))
+$(1).bc: $(call libname2bclib,$(1))
 
 .PHONY: $(1)
 endef

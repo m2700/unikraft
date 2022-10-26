@@ -46,6 +46,12 @@ $(XEN_IMAGE): $(XEN_DEBUG_IMAGE)
 			$< -o $@ && \
 		$(STRIP) -s $@)
 
+$(XEN_IMAGE).bc: $(XEN_BC_OLIBS) $(XEN_BC_OLIBS-y) $(UK_BC_OLIBS) $(UK_BC_OLIBS-y)
+	$(call build_cmd,BCLD,,$(XEN_IMAGE).bc,\
+	       $(BCLD) $(XEN_BC_OLIBS) $(XEN_BC_OLIBS-y) \
+			       $(UK_BC_OLIBS) $(UK_BC_OLIBS-y) \
+			       -o $(XEN_IMAGE).bc)
+
 ifeq (arm,$(CONFIG_UK_ARCH))
 $(XEN_RAW_IMAGE): $(XEN_IMAGE)
 	$(call build_cmd,OBJCOPY,,$@,$(OBJCOPY) -O binary $< $@)
@@ -68,6 +74,7 @@ endif
 ifeq ($(CONFIG_PLAT_XEN),y)
 UK_DEBUG_IMAGES-y                     += $(XEN_DEBUG_IMAGE)
 UK_IMAGES-y                           += $(XEN_IMAGE)
+UK_IMAGES-$(CONFIG_GENERATE_BITCODE)  += $(KVM_IMAGE).bc
 UK_IMAGES-$(CONFIG_OPTIMIZE_SYMFILE)  += $(XEN_IMAGE).sym
 
 ifeq (arm,$(CONFIG_UK_ARCH))

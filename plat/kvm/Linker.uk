@@ -47,6 +47,12 @@ $(KVM_IMAGE): $(KVM_IMAGE).dbg
 			$< -o $@ && \
 		$(STRIP) -s $@)
 
+$(KVM_IMAGE).bc: $(KVM_BC_OLIBS) $(KVM_BC_OLIBS-y) $(UK_BC_OLIBS) $(UK_BC_OLIBS-y)
+	$(call build_cmd,BCLD,,$(KVM_IMAGE).bc,\
+	       $(BCLD) $(KVM_BC_OLIBS) $(KVM_BC_OLIBS-y) \
+			       $(UK_BC_OLIBS) $(UK_BC_OLIBS-y) \
+			       -o $(KVM_IMAGE).bc)
+
 $(KVM_IMAGE).sym: $(KVM_DEBUG_IMAGE)
 	$(call build_cmd,NM,,$@, $(NM) -n $< > $@)
 
@@ -57,6 +63,7 @@ $(KVM_IMAGE).gz: $(KVM_IMAGE)
 ifeq ($(CONFIG_PLAT_KVM),y)
 UK_DEBUG_IMAGES-y                     += $(KVM_DEBUG_IMAGE)
 UK_IMAGES-y                           += $(KVM_IMAGE)
+UK_IMAGES-$(CONFIG_GENERATE_BITCODE)  += $(KVM_IMAGE).bc
 UK_IMAGES-$(CONFIG_OPTIMIZE_SYMFILE)  += $(KVM_IMAGE).sym
 UK_IMAGES-$(CONFIG_OPTIMIZE_COMPRESS) += $(KVM_IMAGE).gz
 endif
