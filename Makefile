@@ -293,12 +293,16 @@ UK_ALIBS:=
 UK_ALIBS-y:=
 UK_OLIBS:=
 UK_OLIBS-y:=
+UK_BC_OLIBS:=
+UK_BC_OLIBS-y:=
 UK_SRCS:=
 UK_SRCS-y:=
 UK_DEPS:=
 UK_DEPS-y:=
 UK_OBJS:=
 UK_OBJS-y:=
+UK_BC_OBJS:=
+UK_BC_OBJS-y:=
 UK_IMAGES:=
 UK_IMAGES-y:=
 UK_CLEAN :=
@@ -337,6 +341,8 @@ EACHOLIB_SRCS :=
 EACHOLIB_SRCS-y :=
 EACHOLIB_OBJS :=
 EACHOLIB_OBJS-y :=
+EACHOLIB_BC_OBJS :=
+EACHOLIB_BC_OBJS-y :=
 EACHOLIB_ALIBS :=
 EACHOLIB_ALIBS-y :=
 EACHOLIB_LOCALS :=
@@ -379,6 +385,9 @@ endif
 ifndef HOSTLD
 HOSTLD := ld
 endif
+ifndef HOSTBCLD
+HOSTBCLD := llvm-link
+endif
 ifndef HOSTLN
 HOSTLN := ln
 endif
@@ -395,6 +404,7 @@ HOSTAR		:= $(shell which $(HOSTAR) || type -p $(HOSTAR) || echo ar)
 HOSTAS		:= $(shell which $(HOSTAS) || type -p $(HOSTAS) || echo as)
 HOSTCPP		:= $(shell which $(HOSTCPP) || type -p $(HOSTCPP) || echo cpp)
 HOSTLD		:= $(shell which $(HOSTLD) || type -p $(HOSTLD) || echo ld)
+HOSTBCLD	:= $(shell which $(HOSTBCLD) || type -p $(HOSTBCLD) || echo llvm-link)
 HOSTLN		:= $(shell which $(HOSTLN) || type -p $(HOSTLN) || echo ln)
 HOSTNM		:= $(shell which $(HOSTNM) || type -p $(HOSTNM) || echo nm)
 HOSTOBJCOPY	:= $(shell which $(HOSTOBJCOPY) || type -p $(HOSTOBJCOPY) || echo objcopy)
@@ -421,7 +431,7 @@ export HOSTARCH := $(shell LC_ALL=C $(HOSTCC_NOCCACHE) -v 2>&1 | \
 		       -e 's/ppc/powerpc/' \
 		       -e 's/macppc/powerpc/' \
 		       -e 's/sh.*/sh/' )
-export HOSTAR HOSTAS HOSTCC HOSTCC_VERSION HOSTCXX HOSTLD HOSTARCH
+export HOSTAR HOSTAS HOSTCC HOSTCC_VERSION HOSTCXX HOSTLD HOSTBCLD HOSTARCH
 export HOSTCC_NOCCACHE HOSTCXX_NOCCACHE
 
 ################################################################################
@@ -526,6 +536,7 @@ unexport CONFIG_LLVM_TARGET_ARCH
 unexport CONFIG_COMPILER
 #unexport CC
 #unexport LD
+#unexport BCLD
 #unexport AR
 #unexport CXX
 #unexport CPP
@@ -571,6 +582,7 @@ $(eval $(call verbose_include,$(CONFIG_UK_BASE)/arch/$(UK_FAMILY)/Compiler.uk))
 
 # Make variables (CC, etc...)
 LD		:= $(CONFIG_CROSS_COMPILE)$(CONFIG_COMPILER)
+BCLD		:= $(CONFIG_CROSS_COMPILE)llvm-link
 CC		:= $(CONFIG_CROSS_COMPILE)$(CONFIG_COMPILER)
 CPP		:= $(CC)
 CXX		:= $(CPP)
@@ -704,8 +716,10 @@ prepare: $(UK_FIXDEP) | fetch
 preprocess: $(UK_PREPROCESS) $(UK_PREPROCESS-y) | prepare
 
 objs: $(UK_OBJS) $(UK_OBJS-y)
+bc_objs: $(UK_BC_OBJS) $(UK_BC_OBJS-y)
 
 libs: $(UK_ALIBS) $(UK_ALIBS-y) $(UK_OLIBS) $(UK_OLIBS-y)
+bc_libs: $(UK_BC_OLIBS) $(UK_BC_OLIBS-y)
 
 images: $(UK_DEBUG_IMAGES) $(UK_DEBUG_IMAGES-y) $(UK_IMAGES) $(UK_IMAGES-y)
 

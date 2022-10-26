@@ -152,6 +152,12 @@ config OPTIMIZE_COMPRESS
 		Create compressed images. Please note that not all platforms
 		support compressing.
 
+config GENERATE_BITCODE
+	bool "Generate LLVM bitcode"
+	default n
+	help
+		Generate compile all non-assembly files to LLVM bitcode.
+
 config RECORD_BUILDTIME
 	bool "Keep track of Building time"
 	default n
