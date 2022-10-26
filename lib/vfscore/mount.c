@@ -95,14 +95,14 @@ fs_getfs(const char *name)
 	return NULL;
 }
 
-int device_open(const char *name __unused, int mode __unused,
+static int device_open(const char *name __unused, int mode __unused,
 		struct device **devp __unused)
 {
 	UK_CRASH("%s is not implemented (%s)\n", __func__, name);
 	return 0;
 }
 
-int device_close(struct device *dev)
+static int device_close(struct device *dev)
 {
 	(void) dev;
 	UK_CRASH("%s not implemented", __func__);
