@@ -49,6 +49,8 @@
 #include <uk/tlsf.h>
 #elif CONFIG_LIBUKBOOT_INITTINYALLOC
 #include <uk/tinyalloc.h>
+#elif CONFIG_LIBUKBOOT_INITSPLINTER
+#include <uk/allocsplinter.h>
 #endif
 #if CONFIG_LIBUKSCHED
 #include <uk/sched.h>
@@ -250,6 +252,8 @@ void ukplat_entry(int argc, char *argv[])
 			a = uk_tlsf_init(md.base, md.len);
 #elif CONFIG_LIBUKBOOT_INITTINYALLOC
 			a = uk_tinyalloc_init(md.base, md.len);
+#elif CONFIG_LIBUKBOOT_INITSPLINTER
+			a = uk_splinteralloc_init(md.base, md.len);
 #endif
 		} else {
 			uk_alloc_addmem(a, md.base, md.len);
