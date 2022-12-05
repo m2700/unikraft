@@ -113,6 +113,10 @@ if LIBUKBOOT
 		depends on LIBTLSF_INCLUDED
 		select LIBTLSF
 
+		config LIBUKBOOT_INITSPLINTER
+		bool "Linked List Allocator, supporting efficient dynamic regions"
+		select LIBUKALLOCSPLINTER
+
 		config LIBUKBOOT_NOALLOC
 		bool "None"
 
