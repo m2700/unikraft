@@ -154,19 +154,22 @@ SECTIONS
 def main():
     parser = argparse.ArgumentParser(
         description="Generate linker script for library components")
-    parser.add_argument('-d', '--as-defines',
-                        action='store_true')
-    parser.add_argument('-w', '--wildcard-location',
-                        action='store_true')
-    parser.add_argument("comp_num", help="Number of components",
-                        metavar='component-count', type=int)
-    parser.add_argument(
+    subparsers = parser.add_subparsers(dest="cmd", required=True)
+    defs_parser = subparsers.add_parser(
+        "defs", help="Generate linker script defines")
+    remap_parser = subparsers.add_parser(
+        "remap", help="Generate a library to component, section remapping, linker script")
+    defs_parser.add_argument("comp_num", help="Number of components",
+                             metavar='component-count', type=int)
+    remap_parser.add_argument('-w', '--wildcard-location',
+                              action='store_true')
+    remap_parser.add_argument(
         'lib_comp_mappings', metavar='library.o=component-id', nargs='*', type=str,
         help='Library Component mappings'
     )
     opt = parser.parse_args()
 
-    if opt.as_defines:
+    if opt.cmd == 'defs':
         print(generic_linker_defs(opt))
     else:
         print(link_remap_sections(opt))
