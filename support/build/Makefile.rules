@@ -265,11 +265,11 @@ sub_libbuild_dir = $(BUILD_DIR)/$(1)/$(2)
 # defines a global macro definition for all supported languages
 # $macro,$value
 define global_define =
-ASFLAGS		+= -D$(2)=$(3)
-CFLAGS		+= -D$(2)=$(3)
-CXXFLAGS	+= -D$(2)=$(3)
-GOCFLAGS	+= -D$(2)=$(3)
-RUSTCFLAGS	+= --cfg '$(2)="$(3)"'
+ASFLAGS		+= -D$(1)=$(2)
+CFLAGS		+= -D$(1)=$(2)
+CXXFLAGS	+= -D$(1)=$(2)
+GOCFLAGS	+= -D$(1)=$(2)
+RUSTCFLAGS	+= --cfg '$(1)="$(2)"'
 endef
 
 ################################################################################
