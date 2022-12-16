@@ -263,14 +263,18 @@ endef
 sub_libbuild_dir = $(BUILD_DIR)/$(1)/$(2)
 
 # defines a global macro definition for all supported languages
-# $macro,$value
-define global_define =
-ASFLAGS		+= -D$(1)=$(2)
-CFLAGS		+= -D$(1)=$(2)
-CXXFLAGS	+= -D$(1)=$(2)
-GOCFLAGS	+= -D$(1)=$(2)
-RUSTCFLAGS	+= --cfg '$(1)="$(2)"'
+
+# $prefix,$macro,$value,$switch
+define prefix_define_s =
+$(if $(1),$(call uc,$(1))_)ASFLAGS-$(4)		+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)CFLAGS-$(4)		+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)CXXFLAGS-$(4)	+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)GOCFLAGS-$(4)	+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)RUSTCFLAGS-$(4)	+= --cfg '$(2)="$(3)"'
 endef
+
+# $macro,$value,$switch
+global_define_s = $(call prefix_define_s,,$(1),$(2),$(3))
 
 ################################################################################
 #
@@ -547,7 +551,6 @@ $(4): $(2) | preprocess
 		       $(5) \
 		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
 		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
-			   -D__COMPONENT__=$(call lib_component,$(1)) \
 		       -c $(2) -o $(4) $(call depflags,$(4))
 	)
 
@@ -575,7 +578,6 @@ $(4): $(2) | preprocess
 		       $(5) \
 		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
 		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
-			   -D__COMPONENT__=$(call lib_component,$(1)) \
 		       -c $(2) -o $(4)
 	)
 
@@ -601,7 +603,6 @@ $(4): $(2) | preprocess
 		       $(5) \
 		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
 		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
-			   -D__COMPONENT__=$(call lib_component,$(1)) \
 		       -c $(2) -o $(4) $(call depflags,$(4))
 	)
 
@@ -620,7 +621,6 @@ $(call obj2bc,$(4)): $(2) | preprocess
 		       $(5) \
 		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
 		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
-			   -D__COMPONENT__=$(call lib_component,$(1)) \
 		       -c $(2) -o $(call obj2bc,$(4)) $(call depflags,$(call obj2bc,$(4)))
 	)
 
@@ -650,7 +650,6 @@ $(4): $(2) | preprocess
 		       $(5) \
 		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
 		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
-			   -D__COMPONENT__=$(call lib_component,$(1)) \
 		       -c $(2) -o $(4) $(call depflags,$(4))
 	)
 
@@ -668,7 +667,6 @@ $(call obj2bc,$(4)): $(2) | preprocess
 		       $(5) \
 		       $$(DBGFLAGS) $$(DBGFLAGS-y) \
 		       -D__LIBNAME__=$(1) -D__BASENAME__=$(notdir $(2)) $(if $(3),-D__VARIANT__=$(3)) \
-			   -D__COMPONENT__=$(call lib_component,$(1)) \
 		       -c $(2) -o $(call obj2bc,$(4)) $(call depflags,$(call obj2bc,$(4)))
 	)
 
@@ -700,7 +698,6 @@ $(4): $(2) | preprocess
 			$$($(call vprefix_lib,$(1),RUSTCFLAGS)) $$($(call vprefix_lib,$(1),RUSTCFLAGS-y)) \
 			$$($(call vprefix_src,$(1),$(2),$(3),FLAGS)) $$($(call vprefix_src,$(1),$(2),$(3),FLAGS-y)) \
 			--cfg '__LIBNAME__="$(1)"' --cfg '__BASENAME__="$(notdir $(2))"' $(if $(3),--cfg '__VARIANT__="$(3)"') \
-			-cfg  '__COMPONENT__="$(call lib_component,$(1))"' \
 			$(2) -o $(4)
 	)
 
