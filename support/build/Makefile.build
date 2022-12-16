@@ -34,6 +34,7 @@ $(eval $(call buildrule_olib,$(L))); \
 $(eval UK_OLIBS-y += $(call libname2olib,$(L))); \
 $(eval UK_BC_OLIBS-y += $(call libname2bclib,$(L))); \
 $(eval UK_COMPONENTS += $(call lib_component,$(L))); \
+$(eval $(call global_define,__$(L)_COMPONENT__,$(call lib_component,$(L)))) \
 , \
 $(call verbose_info,Warning: '$(L)' has no sources or object files$(comma) ignoring...) \
 ) \
@@ -60,6 +61,7 @@ $(eval $(call buildrule_olib,$(L))); \
 $(eval $(call uc,$(P))_OLIBS-y    += $(call libname2olib,$(L))); \
 $(eval $(call uc,$(P))_BC_OLIBS-y += $(call libname2bclib,$(L))); \
 $(eval $(call uc,$(P))_COMPONENTS += $(call lib_component,$(L))); \
+$(eval $(call global_define,__$(L)_COMPONENT__,$(call lib_component,$(L)))) \
 , \
 $(call verbose_info,Warning: '$(L)' has no sources or object files$(comma) ignoring...) \
 ) \
