@@ -81,18 +81,18 @@ endif
 ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
 $(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
 $(eval $(call uc,$(P))_COMPONENTS := \
-	$(shell printf "%s\n" $(sort $($(call uc,$(P))_COMPONENTS)) | sort -bn)); \
+	$(call sort_num,$($(call uc,$(P))_COMPONENTS))); \
 )
 endif
 
 ifneq ($(call qstrip,$(UK_LIBS) $(UK_LIBS-y)),)
-UK_COMPONENTS := $(shell printf "%s\n" $(sort $(UK_COMPONENTS)) | sort -bn)
+UK_COMPONENTS := $(call sort_num,$(UK_COMPONENTS))
 endif
 
 ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
 $(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
 $(eval $(call uc,$(P))_UK_COMPONENTS := \
-	$(shell printf "%s\n" $(sort $($(call uc,$(P))_COMPONENTS) $(UK_COMPONENTS)) | sort -bn)); \
+	$(call sort_num,$($(call uc,$(P))_COMPONENTS) $(UK_COMPONENTS))); \
 )
 endif
 
