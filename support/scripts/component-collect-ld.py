@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-from typing import Iterable
+from typing import Iterable, Sequence
+import itertools
 
 
 def iter_component_tuples(comp_num: int, min_comp: int = 0, max_tuple_size: int = 0) -> Iterable[tuple[int]]:
@@ -16,33 +17,70 @@ def iter_component_tuples(comp_num: int, min_comp: int = 0, max_tuple_size: int 
                 yield (comp_i,) + sub_comp_tuple
 
 
-def component_section_script(target_section: str, src_sections, comp_num: int | None = None,
-                             comp_map: Iterable[tuple[str, int]] | None = None,
+def section_inner_script(lib_pats:  Iterable[str],
+                         target_section: str, src_sections: Iterable[str],
+                         extent_syms: bool = False, keep_target: bool = False) -> str:
+    sec_inner_lines = []
+
+    target_section_sym = target_section.lstrip('.').replace('.', '_')
+
+    if extent_syms:
+        sec_inner_lines.append(f"__{target_section_sym}_start = .;")
+
+    for lib_pat in lib_pats:
+        sec_inner_lines.extend(
+            f"{lib_pat}({src_sec})" for src_sec in src_sections)
+
+    if extent_syms:
+        sec_inner_lines.append(f"__{target_section_sym}_end = .;")
+
+    if keep_target:
+        sec_inner_lines.append(f". = .;")
+
+    sec_inner = "\n    ".join(sec_inner_lines)
+
+    return sec_inner
+
+
+def component_section_script(target_section: str, src_sections: Iterable[str],
+                             comp_num: int | None = None,
+                             comp_map: Iterable[tuple[int | Sequence[int],
+                                                      Iterable[str]]] | None = None,
                              page_aligned: bool = False, extent_syms: bool = False,
-                             component_src: bool = False) -> str:
+                             component_src: bool = False, keep_orig_target: bool = False) -> str:
     s = ""
     if comp_num is not None:
         assert comp_map is None
-        comp_map = (("*", comp_share)
+        comp_map = ((comp_share, {"*"})
                     for comp_share in iter_component_tuples(comp_num))
+    if keep_orig_target:
+        assert not component_src  # not supported
+        comp_map = itertools.chain(comp_map, [(None, {"*"})])
 
-    for lib_pat, comp_share in comp_map:
-        comp_share_name = f"component{'_'.join(map(str, comp_share))}"
-        comp_share_prefix = f".{comp_share_name}." if component_src else ""
+    for comp_share, lib_pats in comp_map:
+        comp_src_sections = src_sections
+        keep_target = False
 
-        src_section_pats = "\n    ".join(
-            f"{lib_pat}({comp_share_prefix}{src_sec})" for src_sec in src_sections)
+        if comp_share is None:
+            assert not component_src  # not supported
+            comp_target_section = f".{target_section}"
+            keep_target = keep_orig_target
+        else:
+            if isinstance(comp_share, int):
+                comp_share = (comp_share,)
 
-        start_sym = end_sym = ""
-        if extent_syms:
-            start_sym = f"__{comp_share_name}_{target_section}"
-            end_sym = f"__{comp_share_name}_{target_section}_end"
+            comp_share_name = f"component{'_'.join(map(str, comp_share))}"
+            comp_target_section = f".{comp_share_name}.{target_section}"
 
-        sec_inner = "\n    ".join(
-            filter(None, [start_sym, src_section_pats, end_sym]))
+            if component_src:
+                comp_src_sections = {f".{comp_share_name}.{src_sec}"
+                                     for src_sec in src_sections}
+
+        sec_inner = section_inner_script(lib_pats, comp_target_section, comp_src_sections,
+                                         extent_syms=extent_syms, keep_target=keep_target)
 
         s += f"""\
-.{comp_share_name}.{target_section} : {{
+{comp_target_section} : {{
     {sec_inner}
 }}
 """
@@ -104,31 +142,41 @@ def generic_linker_defs(opt: argparse.Namespace):
 
 
 def link_remap_sections(opt: argparse.Namespace):
-    lib_comp_map = opt.lib_comp_mappings
+    lib_comp_mappings = opt.lib_comp_mappings
     if opt.wildcard_location:
-        lib_comp_map = (f"*/{lib_comp}" for lib_comp in lib_comp_map)
-    lib_comp_map = [lib_comp.split("=")
-                    for lib_comp in lib_comp_map]
+        assert (not opt.single_match_location)
+        lib_comp_mappings = (f"*/{lib_comp}" for lib_comp in lib_comp_mappings)
+    comp_lib_map = {}
+    for lib_comp in lib_comp_mappings:
+        lib, comp = lib_comp.split("=")
+        if opt.single_match_location:
+            assert (not opt.wildcard_location)
+            lib = f"{lib[:-1]}[{lib[-1]}]"
+        comp_lib_map.setdefault(int(comp), set()).add(lib)
 
     text_comp_sects = component_section_script(
-        'text', ['.text', '.text.*'], comp_map=lib_comp_map
+        'text', ['.text', '.text.*'],
+        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     rodata_comp_sects = component_section_script(
-        'rodata', ['.rodata', '.rodata.*'], comp_map=lib_comp_map
+        'rodata', ['.rodata', '.rodata.*'],
+        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     tdata_comp_sects = component_section_script(
         'tdata', ['.tdata', '.tdata.*', '.gnu.linkonce.td.*'],
-        comp_map=lib_comp_map
+        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     tbss_comp_sects = component_section_script(
         'tbss', ['.tbss', '.tbss.*', '.tcommon', '.gnu.linkonce.tb.*'],
-        comp_map=lib_comp_map
+        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     data_comp_sects = component_section_script(
-        'data', ['.data', '.data.*'], comp_map=lib_comp_map
+        'data', ['.data', '.data.*'],
+        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     bss_comp_sects = component_section_script(
-        'bss', ['.bss', '.bss.*', 'COMMON'], comp_map=lib_comp_map
+        'bss', ['.bss', '.bss.*', 'COMMON'],
+        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
 
     link_s = f"""\
@@ -163,6 +211,9 @@ def main():
                              metavar='component-count', type=int)
     remap_parser.add_argument('-w', '--wildcard-location',
                               action='store_true')
+    remap_parser.add_argument(
+        '-s', '--single-match-location', action='store_true')
+    remap_parser.add_argument("-k", "--keep-remapped", action="store_true")
     remap_parser.add_argument(
         'lib_comp_mappings', metavar='library.o=component-id', nargs='*', type=str,
         help='Library Component mappings'
