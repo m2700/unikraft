@@ -52,6 +52,9 @@ $(if $(call gcc_version_ge,$(1),$(2)),,\
      $(error Require GCC version >= $(1).$(2) found $(CC_VER_MAJOR).$(CC_VER_MINOR)))
 endef
 
+# sort_num $list
+sort_num = $(shell printf "%s\n" $(sort $(1)) | sort -bn)
+
 ################################################################################
 #
 # Paths and Filenames
