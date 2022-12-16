@@ -144,6 +144,16 @@ $($(call vprefix_lib,$(1),COMPONENT-y)),\
 $(UK_DEFAULT_COMPONENT))))
 endef
 
+# component_share_id $libnames
+define component_share_id =
+$(subst $(space),_,$(call sort_num,$(foreach L,$(1),$(call lib_component,$(L)))))
+endef
+
+# add_component_share $sharename,$libnames
+define add_component_share =
+$(call global_define,$(1),component$(call component_share_id,$(2)))
+endef
+
 ################################################################################
 #
 # Variable name prefixes
@@ -265,19 +275,27 @@ endef
 
 sub_libbuild_dir = $(BUILD_DIR)/$(1)/$(2)
 
-# defines a global macro definition for all supported languages
-
-# $prefix,$macro,$value,$switch
-define prefix_define_s =
-$(if $(1),$(call uc,$(1))_)ASFLAGS-$(4)		+= -D$(2)=$(3)
-$(if $(1),$(call uc,$(1))_)CFLAGS-$(4)		+= -D$(2)=$(3)
-$(if $(1),$(call uc,$(1))_)CXXFLAGS-$(4)	+= -D$(2)=$(3)
-$(if $(1),$(call uc,$(1))_)GOCFLAGS-$(4)	+= -D$(2)=$(3)
-$(if $(1),$(call uc,$(1))_)RUSTCFLAGS-$(4)	+= --cfg '$(2)="$(3)"'
+# defines a local macro definition for all supported languages
+# $libname,$macro,$value
+define local_define =
+$(if $(1),$(call uc,$(1))_)ASFLAGS		+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)CFLAGS		+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)CXXFLAGS		+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)GOCFLAGS		+= -D$(2)=$(3)
+$(if $(1),$(call uc,$(1))_)RUSTCFLAGS	+= --cfg '$(2)="$(3)"'
 endef
 
+# $libname,$macro,$value,$switch
+define local_define_s =
+$(if $(filter y,$(4)),$(call local_define,$(1),$(2),$(3)))
+endef
+
+# defines a global macro definition for all supported languages
+# $macro,$value
+global_define = $(call local_define,,$(1),$(2))
+
 # $macro,$value,$switch
-global_define_s = $(call prefix_define_s,,$(1),$(2),$(3))
+global_define_s = $(call local_define_s,,$(1),$(2),$(3))
 
 ################################################################################
 #
