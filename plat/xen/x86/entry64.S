@@ -54,7 +54,7 @@ ELFNOTE(Xen, XEN_ELFNOTE_XEN_VERSION, .asciz "xen-3.0")
 
 .globl _libxenplat_start
 
-.section .text.boot, "ax"
+.section .boot.text, "ax"
 _libxenplat_start:
 
 #endif

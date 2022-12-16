@@ -33,6 +33,7 @@ $(if $(call qstrip,$($(call uc,$(L))_OBJS) $($(call uc,$(L))_OBJS-y)), \
 $(eval $(call buildrule_olib,$(L))); \
 $(eval UK_OLIBS-y += $(call libname2olib,$(L))); \
 $(eval UK_BC_OLIBS-y += $(call libname2bclib,$(L))); \
+$(eval UK_COMPONENTS += $(call lib_component,$(L))); \
 , \
 $(call verbose_info,Warning: '$(L)' has no sources or object files$(comma) ignoring...) \
 ) \
@@ -58,6 +59,7 @@ $(if $(call qstrip,$($(call uc,$(L))_OBJS) $($(call uc,$(L))_OBJS-y)), \
 $(eval $(call buildrule_olib,$(L))); \
 $(eval $(call uc,$(P))_OLIBS-y    += $(call libname2olib,$(L))); \
 $(eval $(call uc,$(P))_BC_OLIBS-y += $(call libname2bclib,$(L))); \
+$(eval $(call uc,$(P))_COMPONENTS += $(call lib_component,$(L))); \
 , \
 $(call verbose_info,Warning: '$(L)' has no sources or object files$(comma) ignoring...) \
 ) \
@@ -65,5 +67,43 @@ $(call verbose_info,Warning: '$(L)' has no sources or object files$(comma) ignor
 , \
 $(call verbose_info,Warning: '$(P)' has no registered libraries$(comma) ignoring...) \
 ); \
+)
+endif
+
+#################################################
+#
+# Sort and deduplicate component lists
+#
+#################################################
+
+ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+$(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+$(eval $(call uc,$(P))_COMPONENTS := \
+	$(shell printf "%s\n" $(sort $($(call uc,$(P))_COMPONENTS)) | sort -bn)); \
+)
+endif
+
+ifneq ($(call qstrip,$(UK_LIBS) $(UK_LIBS-y)),)
+UK_COMPONENTS := $(shell printf "%s\n" $(sort $(UK_COMPONENTS)) | sort -bn)
+endif
+
+ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+$(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+$(eval $(call uc,$(P))_UK_COMPONENTS := \
+	$(shell printf "%s\n" $(sort $($(call uc,$(P))_COMPONENTS) $(UK_COMPONENTS)) | sort -bn)); \
+)
+endif
+
+#################################################
+#
+# Install linker scripts tules
+#
+#################################################
+
+ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+$(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+$(eval $(call generate_component_linker_defines,$(P),$(lastword $($(call uc,$(P))_UK_COMPONENTS)))) \
+$(eval $(call generate_component_section_remap_script,$(P),\
+$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y) $(UK_LIBS) $(UK_LIBS-y))) \
 )
 endif

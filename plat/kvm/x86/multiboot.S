@@ -42,7 +42,7 @@
 #define MULTIBOOT_FLAGS \
 	(MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | MULTIBOOT_AOUT_KLUDGE)
 
-.section .data.boot
+.section .boot.data
 
 .align 4
 multiboot_header:

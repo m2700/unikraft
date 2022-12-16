@@ -76,6 +76,12 @@ libname2preolib = $(addprefix $(BUILD_DIR)/,$(addsuffix .ld.o,$(1)))
 
 libname2bclib = $(addprefix $(BUILD_DIR)/,$(addsuffix .bc,$(1)))
 
+define libname2olib_if_exists =
+$(strip \
+$(if $(call qstrip,$($(call uc,$(1))_OBJS) $($(call uc,$(1))_OBJS-y)),\
+$(call libname2olib,$(1))))
+endef
+
 # converts a list of sources to paths pointing to their corresponding destination files
 # src2dst $libname,$source(s),$destsuffix,$variant(optional)
 define src2dst =
@@ -118,6 +124,21 @@ endef
 # dts2dtb $libname,$dts
 define dts2dtb =
 $(addprefix $(call sub_build_dir,$(1))/,$(addsuffix .dtb,$(basename $(notdir $(2)))))
+endef
+
+################################################################################
+#
+# Component Lookup
+#
+################################################################################
+
+# lib_component $libname
+define lib_component =
+$(strip $(if $(call qstrip,$($(call vprefix_lib,$(1),COMPONENT))),\
+$($(call vprefix_lib,$(1),COMPONENT)),\
+$(if $(call qstrip,$($(call vprefix_lib,$(1),COMPONENT-y))),\
+$($(call vprefix_lib,$(1),COMPONENT-y)),\
+$(UK_DEFAULT_COMPONENT))))
 endef
 
 ################################################################################
@@ -981,6 +1002,30 @@ $(1).bc: $(call libname2bclib,$(1))
 .PHONY: $(1)
 endef
 
+# generate_component_linker_defines $platname $component-count
+define generate_component_linker_defines
+$(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
+$(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h: $(SCRIPTS_DIR)/component-collect-ld.py
+	$(call verbose_cmd,MK-LD,$(notdir $$@),\
+		$(SCRIPTS_DIR)/component-collect-ld.py defs $$$$(($(2) + 1)) > $$@)
+UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
+UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
+endef
+
+# generate_component_section_remap_script $platname $libnames
+define generate_component_section_remap_script
+$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld: $(SCRIPTS_DIR)/component-collect-ld.py
+	$(call verbose_cmd,MK-LD,$(notdir $$@),\
+		$(SCRIPTS_DIR)/component-collect-ld.py remap -ks \
+			$(foreach L,$(2),$(strip \
+				$(if $(call libname2olib_if_exists,$(L)),\
+					$(call libname2olib,$(L))=$(call lib_component,$(L))))) \
+			> $$@
+	)
+UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
+UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
+$(call uc,$(1))_LIBLDFLAGS-$(CONFIG_COMPONENT_SPLITTING) += -T$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
+endef
 
 #################################################
 #

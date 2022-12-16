@@ -34,6 +34,17 @@
 
 #include <uk/arch/limits.h> /* for __PAGE_SIZE */
 
+#ifdef CONFIG_COMPONENT_SPLITTING
+#include <uk/kvm/components.lds.h>
+#else
+#define COMPONENT_TEXT_SECTIONS
+#define COMPONENT_RODATA_SECTIONS
+#define COMPONENT_TDATA_SECTIONS
+#define COMPONENT_TBSS_SECTIONS
+#define COMPONENT_DATA_SECTIONS
+#define COMPONENT_BSS_SECTIONS
+#endif
+
 /* DWARF debug sections.  Symbols in the DWARF debugging sections are
  * relative to the beginning of the section so we begin them at 0.
  */
@@ -118,6 +129,7 @@
 		*(.tdata.*)						\
 		*(.gnu.linkonce.td.*)					\
 	}								\
+	COMPONENT_TDATA_SECTIONS		\
 	_etdata = .;							\
 	.tbss :								\
 	{								\
@@ -126,6 +138,7 @@
 		*(.gnu.linkonce.tb.*)					\
 		*(.tcommon)						\
 	}								\
+	COMPONENT_TBSS_SECTIONS			\
 	/*								\
 	 * NOTE: Because the .tbss section is zero-sized in the final	\
 	 *       ELF image, just setting _tls_end to the end of it	\
@@ -144,6 +157,7 @@
 		*(.data)						\
 		*(.data.*)						\
 	}								\
+	COMPONENT_DATA_SECTIONS				\
 	_edata = .;							\
 									\
 	/*								\
@@ -159,7 +173,8 @@
 		*(.bss)							\
 		*(.bss.*)						\
 		*(COMMON)						\
-		. = ALIGN(__PAGE_SIZE);					\
-	}
+	}										\
+	. = ALIGN(__PAGE_SIZE);			\
+	COMPONENT_BSS_SECTIONS
 
 #endif /* __UK_COMMON_LDS_H */
