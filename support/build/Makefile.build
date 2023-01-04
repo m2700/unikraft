@@ -98,7 +98,35 @@ endif
 
 #################################################
 #
-# Install linker scripts tules
+# Install Global Component Share
+#
+#################################################
+
+ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+$(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+$(eval \
+	$(call global_define_s,__SHARE_$(P)__,$(subst $(space),_,$($(call uc,$(P))_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
+); \
+)
+endif
+
+ifneq ($(call qstrip,$(UK_LIBS) $(UK_LIBS-y)),)
+$(eval $(call global_define_s,__SHARE_UK__,$(subst $(space),_,$(UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING))); \
+endif
+
+ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+$(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+$(eval $(call uc,$(P))_UK_COMPONENTS := \
+	$(call sort_num,$($(call uc,$(P))_COMPONENTS) $(UK_COMPONENTS))); \
+$(eval \
+	$(call global_define_s,__SHARE_$(P)_UK__,$(subst $(space),_,$($(call uc,$(P))_UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
+); \
+)
+endif
+
+#################################################
+#
+# Install linker scripts rules
 #
 #################################################
 
