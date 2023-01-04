@@ -47,8 +47,10 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
                              comp_map: Iterable[tuple[int | Sequence[int],
                                                       Iterable[str]]] | None = None,
                              page_aligned: bool = False, extent_syms: bool = False,
-                             component_src: bool = False, keep_orig_target: bool = False) -> str:
+                             component_src: bool = False, keep_orig_target: bool = False,
+                             all_share_section: bool = False) -> str:
     s = ""
+
     if comp_num is not None:
         assert comp_map is None
         comp_map = ((comp_share, {"*"})
@@ -56,6 +58,11 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
     if keep_orig_target:
         assert not component_src  # not supported
         comp_map = itertools.chain(comp_map, [(None, {"*"})])
+
+    full_comp_share = None
+    if all_share_section:
+        assert comp_num is not None and component_src
+        full_comp_share = tuple(range(comp_num))
 
     for comp_share, lib_pats in comp_map:
         comp_src_sections = src_sections
@@ -75,6 +82,9 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
             if component_src:
                 comp_src_sections = {f".{comp_share_name}.{src_sec}"
                                      for src_sec in src_sections}
+                if comp_share == full_comp_share:
+                    comp_src_sections.update(f".shared.{src_sec}"
+                                             for src_sec in src_sections)
 
         sec_inner = section_inner_script(lib_pats, comp_target_section, comp_src_sections,
                                          extent_syms=extent_syms, keep_target=keep_target)
@@ -93,27 +103,33 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
 def generic_linker_defs(opt: argparse.Namespace):
     text_comp_sects = component_section_script(
         'text', ['text', 'text.*'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True
+        page_aligned=True, extent_syms=True, component_src=True,
+        all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     rodata_comp_sects = component_section_script(
         'rodata', ['rodata', 'rodata.*'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True
+        page_aligned=True, extent_syms=True, component_src=True,
+        all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     tdata_comp_sects = component_section_script(
         'tdata', ['tdata', 'tdata.*', 'gnu.linkonce.td.*'],
-        opt.comp_num, page_aligned=True, extent_syms=True, component_src=True
+        opt.comp_num, page_aligned=True, extent_syms=True, component_src=True,
+        all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     tbss_comp_sects = component_section_script(
         'tbss', ['tbss', 'tbss.*', 'tcommon', 'gnu.linkonce.tb.*'],
-        opt.comp_num, page_aligned=True, extent_syms=True, component_src=True
+        opt.comp_num, page_aligned=True, extent_syms=True, component_src=True,
+        all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     data_comp_sects = component_section_script(
         'data', ['data', 'data.*'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True
+        page_aligned=True, extent_syms=True, component_src=True,
+        all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     bss_comp_sects = component_section_script(
         'bss', ['bss', 'bss.*', 'COMMON'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True
+        page_aligned=True, extent_syms=True, component_src=True,
+        all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
 
     header_s = f"""\
@@ -207,6 +223,8 @@ def main():
         "defs", help="Generate linker script defines")
     remap_parser = subparsers.add_parser(
         "remap", help="Generate a library to component, section remapping, linker script")
+    defs_parser.add_argument('-a', '--all-share-section',
+                             action='store_true')
     defs_parser.add_argument("comp_num", help="Number of components",
                              metavar='component-count', type=int)
     remap_parser.add_argument('-w', '--wildcard-location',
