@@ -121,6 +121,7 @@ $(eval $(call uc,$(P))_UK_COMPONENTS := \
 $(eval \
 	$(call global_define_s,__SHARE_$(P)_UK__,$(subst $(space),_,$($(call uc,$(P))_UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
 ); \
+$(eval $(call global_define_s,__COMPONENT_COUNT_$(P)_UK__,$(lastword $($(call uc,$(P))_UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)));
 )
 endif
 
