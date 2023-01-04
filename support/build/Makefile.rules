@@ -151,7 +151,7 @@ endef
 
 # add_component_share $sharename,$libnames
 define add_component_share =
-$(call global_define,$(1),component$(call component_share_id,$(2)))
+$(call global_define_s,$(1),component$(call component_share_id,$(2)),$(CONFIG_COMPONENT_SPLITTING))
 endef
 
 ################################################################################

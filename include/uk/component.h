@@ -3,18 +3,29 @@
 #include <uk/config.h>
 #include <uk/essentials.h>
 
-#ifndef CONFIG_COMPONENT_SPLITTING
-#error "COMPONENT_SPLITTING must be enabled"
-#endif
-
+#ifdef CONFIG_COMPONENT_SPLITTING
 #define __UK_LIB_COMPONENT(lib) __##lib##_COMPONENT__
+#else // CONFIG_COMPONENT_SPLITTING
+#define __UK_LIB_COMPONENT(lib) 0
+#endif // CONFIG_COMPONENT_SPLITTING
+
 #define UK_LIB_COMPONENT(lib) __UK_LIB_COMPONENT(lib)
 
 #define UK_COMPONENT UK_LIB_COMPONENT(__LIBNAME__)
 
-#define UK_LIB_SECTION(lib, section)                                           \
-	__section(".component" STRINGIFY(UK_LIB_COMPONENT(lib)) "." STRINGIFY( \
-	    section))
+#ifdef CONFIG_COMPONENT_SPLITTING
 
-#define UK_SHARE_SECTION(share, section)                                       \
-	__section("." STRINGIFY(share) "." STRINGIFY(section))
+#define UK_COMP_LIB_SECTION(lib, dot, section)                                           \
+	__section(".component" STRINGIFY(UK_LIB_COMPONENT(lib)) "." section)
+
+#define UK_COMP_SHARE_SECTION(share, dot, section)                                       \
+	__section("." STRINGIFY(share) "." section)
+
+#else // CONFIG_COMPONENT_SPLITTING
+
+#define UK_COMP_LIB_SECTION(lib, dot, section) __section(dot section)
+
+#define UK_COMP_SHARE_SECTION(share, dot, section)                                       \
+	__section(dot section)
+
+#endif // CONFIG_COMPONENT_SPLITTING
