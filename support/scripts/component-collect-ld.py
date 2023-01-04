@@ -17,22 +17,32 @@ def iter_component_tuples(comp_num: int, min_comp: int = 0, max_tuple_size: int 
                 yield (comp_i,) + sub_comp_tuple
 
 
+def start_sym(section: str) -> str:
+    return f"__{section.lstrip('.').replace('.', '_')}_start"
+
+
+def end_sym(section: str) -> str:
+    return f"__{section.lstrip('.').replace('.', '_')}_end"
+
+
+def share_to_section_name(comp_share: Iterable[int], section: str) -> str:
+    return f".component{'_'.join(map(str, comp_share))}.{section}"
+
+
 def section_inner_script(lib_pats:  Iterable[str],
                          target_section: str, src_sections: Iterable[str],
                          extent_syms: bool = False, keep_target: bool = False) -> str:
     sec_inner_lines = []
 
-    target_section_sym = target_section.lstrip('.').replace('.', '_')
-
     if extent_syms:
-        sec_inner_lines.append(f"__{target_section_sym}_start = .;")
+        sec_inner_lines.append(f"{start_sym(target_section)} = .;")
 
     for lib_pat in lib_pats:
         sec_inner_lines.extend(
             f"{lib_pat}({src_sec})" for src_sec in src_sections)
 
     if extent_syms:
-        sec_inner_lines.append(f"__{target_section_sym}_end = .;")
+        sec_inner_lines.append(f"{end_sym(target_section)} = .;")
 
     if keep_target:
         sec_inner_lines.append(f". = .;")
@@ -76,11 +86,11 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
             if isinstance(comp_share, int):
                 comp_share = (comp_share,)
 
-            comp_share_name = f"component{'_'.join(map(str, comp_share))}"
-            comp_target_section = f".{comp_share_name}.{target_section}"
+            comp_target_section = share_to_section_name(
+                comp_share, target_section)
 
             if component_src:
-                comp_src_sections = {f".{comp_share_name}.{src_sec}"
+                comp_src_sections = {share_to_section_name(comp_share, src_sec)
                                      for src_sec in src_sections}
                 if comp_share == full_comp_share:
                     comp_src_sections.update(f".shared.{src_sec}"
@@ -100,7 +110,41 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
     return s.strip()
 
 
-def generic_linker_defs(opt: argparse.Namespace):
+def symlist_mapping_expr(comp_share: Iterable[int], comp_num: int) -> str:
+    comp_share = tuple(comp_share)
+
+    return f"""\
+    {{
+        .share = {{{', '.join(map(str, comp_share + (0,) * (comp_num - len(comp_share))))}}},
+        .text_extents = {{
+            {start_sym(share_to_section_name(comp_share, "text"))},
+            {end_sym(share_to_section_name(comp_share, "text"))},
+        }},
+        .rodata_extents = {{
+            {start_sym(share_to_section_name(comp_share, "rodata"))},
+            {end_sym(share_to_section_name(comp_share, "rodata"))},
+        }},
+        .tdata_extents = {{
+            {start_sym(share_to_section_name(comp_share, "tdata"))},
+            {end_sym(share_to_section_name(comp_share, "tdata"))},
+        }},
+        .tbss_extents = {{
+            {start_sym(share_to_section_name(comp_share, "tbss"))},
+            {end_sym(share_to_section_name(comp_share, "tbss"))},
+        }},
+        .data_extents = {{
+            {start_sym(share_to_section_name(comp_share, "data"))},
+            {end_sym(share_to_section_name(comp_share, "data"))},
+        }},
+        .bss_extents = {{
+            {start_sym(share_to_section_name(comp_share, "bss"))},
+            {end_sym(share_to_section_name(comp_share, "bss"))},
+        }},
+    }}
+""".strip()
+
+
+def generic_linker_defs(opt: argparse.Namespace) -> str:
     text_comp_sects = component_section_script(
         'text', ['text', 'text.*'], opt.comp_num,
         page_aligned=True, extent_syms=True, component_src=True,
@@ -157,7 +201,7 @@ def generic_linker_defs(opt: argparse.Namespace):
     return header_s
 
 
-def link_remap_sections(opt: argparse.Namespace):
+def link_remap_sections(opt: argparse.Namespace) -> str:
     lib_comp_mappings = opt.lib_comp_mappings
     if opt.wildcard_location:
         assert (not opt.single_match_location)
@@ -215,18 +259,58 @@ SECTIONS
     return link_s
 
 
+def symlist_impl(opt: argparse.Namespace) -> str:
+    sections = ["text", "rodata", "tdata", "tbss", "data", "bss"]
+
+    extent_attrs = []
+    for section in sections:
+        extent_attrs.append(f"char *{section}_extents[2];")
+    extent_attrs = "\n    ".join(extent_attrs)
+
+    symbol_decls = []
+    mappings = []
+    for comp_share in iter_component_tuples(opt.comp_num):
+        for section in sections:
+            for to_sym in [start_sym, end_sym]:
+                symbol_decls.append(f"extern char {to_sym(share_to_section_name(comp_share, section))}[];")
+
+        mappings.append(f"{symlist_mapping_expr(comp_share, opt.comp_num)},")
+    symbol_decls = "\n".join(symbol_decls)
+    mappings = "\n    ".join(mappings)
+
+    return f"""\
+#pragma once
+
+struct share_extent_mapping {{
+    unsigned share[{opt.comp_num}];
+    {extent_attrs}
+}};
+
+{symbol_decls}
+
+static struct share_extent_mapping uk_component_symlist[] = {{
+    {mappings}
+}};
+"""
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Generate linker script for library components")
     subparsers = parser.add_subparsers(dest="cmd", required=True)
+
     defs_parser = subparsers.add_parser(
         "defs", help="Generate linker script defines")
     remap_parser = subparsers.add_parser(
         "remap", help="Generate a library to component, section remapping, linker script")
+    symlist_parser = subparsers.add_parser(
+        "symlist", help="Generate C array, containing a mapping of component shares to extent symbols")
+
     defs_parser.add_argument('-a', '--all-share-section',
                              action='store_true')
     defs_parser.add_argument("comp_num", help="Number of components",
                              metavar='component-count', type=int)
+
     remap_parser.add_argument('-w', '--wildcard-location',
                               action='store_true')
     remap_parser.add_argument(
@@ -236,12 +320,18 @@ def main():
         'lib_comp_mappings', metavar='library.o=component-id', nargs='*', type=str,
         help='Library Component mappings'
     )
+
+    symlist_parser.add_argument(
+        "comp_num", help="Number of components", metavar="component-count", type=int)
+
     opt = parser.parse_args()
 
     if opt.cmd == 'defs':
         print(generic_linker_defs(opt))
-    else:
+    elif opt.cmd == 'remap':
         print(link_remap_sections(opt))
+    else:
+        print(symlist_impl(opt))
 
 
 if __name__ == '__main__':

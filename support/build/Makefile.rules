@@ -1037,7 +1037,7 @@ $(1).bc: $(call libname2bclib,$(1))
 .PHONY: $(1)
 endef
 
-# generate_component_linker_defines $platname $component-count
+# generate_component_linker_defines $platname $max-component-id
 define generate_component_linker_defines
 $(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
 $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h: $(SCRIPTS_DIR)/component-collect-ld.py
@@ -1060,6 +1060,16 @@ $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld: $(SCRIPTS_DIR)/component-collec
 UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
 UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
 $(call uc,$(1))_LIBLDFLAGS-$(CONFIG_COMPONENT_SPLITTING) += -T$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
+endef
+
+# generate_component_symlist $platname $max-component-id
+define generate_component_symlist
+$(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
+$(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h: $(SCRIPTS_DIR)/component-collect-ld.py
+	$(call verbose_cmd,MK-LD,$(notdir $$@),\
+		$(SCRIPTS_DIR)/component-collect-ld.py symlist $$$$(($(2) + 1)) > $$@)
+UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h
+UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h
 endef
 
 #################################################
