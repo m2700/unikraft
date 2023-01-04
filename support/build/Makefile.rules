@@ -1017,7 +1017,7 @@ define generate_component_linker_defines
 $(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
 $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h: $(SCRIPTS_DIR)/component-collect-ld.py
 	$(call verbose_cmd,MK-LD,$(notdir $$@),\
-		$(SCRIPTS_DIR)/component-collect-ld.py defs $$$$(($(2) + 1)) > $$@)
+		$(SCRIPTS_DIR)/component-collect-ld.py defs -a $$$$(($(2) + 1)) > $$@)
 UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
 UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
 endef
