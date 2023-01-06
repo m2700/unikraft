@@ -44,3 +44,9 @@
 
 #define __WORDSIZE		64
 #define __WORDSIZE_COMPAT32	1
+
+#ifdef CONFIG_COMPONENT_SPLITTING
+#define TLS_ALIGN __PAGE_SIZE
+#else
+#define TLS_ALIGN 0x20
+#endif

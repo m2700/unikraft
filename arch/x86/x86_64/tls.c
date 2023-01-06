@@ -45,6 +45,7 @@
 #include <uk/essentials.h>
 #include <uk/arch/types.h>
 #include <uk/arch/tls.h>
+#include <uk/arch/limits.h>
 
 #ifndef __UKARCH_TLS_HAVE_TCB__
 #ifndef TCB_SIZE
@@ -115,12 +116,12 @@ __sz ukarch_tls_area_align(void)
 	 * NOTE: This alignment must be bigger or equal to 8 bytes
 	 *       (sizeof(void *)).
 	 */
-	return 0x20;
+	return TLS_ALIGN;
 }
 
 __sz ukarch_tls_tcb_size(void)
 {
-	return (__sz) TCB_SIZE;
+	return (__sz)TCB_SIZE;
 }
 
 __sz ukarch_tls_area_size(void)
@@ -130,16 +131,16 @@ __sz ukarch_tls_area_size(void)
 	 *       TLS allocation is the aligned up TLS area plus 8 bytes for this
 	 *       self-pointer.
 	 */
-	__sz static_tls_len =  ALIGN_UP((__uptr) _tls_end - (__uptr) _tls_start,
-					sizeof(void *));
+	__sz static_tls_len =
+	    ALIGN_UP((__uptr)_tls_end - (__uptr)_tls_start, sizeof(void *));
 	return static_tls_len + TCB_SIZE;
 }
 
 __uptr ukarch_tls_tlsp(void *tls_area)
 {
-	UK_ASSERT(IS_ALIGNED((__uptr) tls_area, ukarch_tls_area_align()));
+	UK_ASSERT(IS_ALIGNED((__uptr)tls_area, ukarch_tls_area_align()));
 
-	return (__uptr) tls_area + ukarch_tls_area_size() - TCB_SIZE;
+	return (__uptr)tls_area + ukarch_tls_area_size() - TCB_SIZE;
 }
 
 void *ukarch_tls_area_get(__uptr tlsp)
@@ -148,9 +149,9 @@ void *ukarch_tls_area_get(__uptr tlsp)
 
 	tls_area = tlsp - (ukarch_tls_area_size() - TCB_SIZE);
 
-	UK_ASSERT(IS_ALIGNED((__uptr) tls_area, ukarch_tls_area_align()));
+	UK_ASSERT(IS_ALIGNED((__uptr)tls_area, ukarch_tls_area_align()));
 
-	return (void *) tls_area;
+	return (void *)tls_area;
 }
 
 void *ukarch_tls_tcb_get(__uptr tlsp)
@@ -158,47 +159,50 @@ void *ukarch_tls_tcb_get(__uptr tlsp)
 	/*
 	 * The TCB pointer is the same as the TLS architecture pointer
 	 */
-	return (void *) tlsp;
+	return (void *)tlsp;
 }
 
 void ukarch_tls_area_init(void *tls_area)
 {
-	const __sz tdata_len = (__uptr) _etdata  - (__uptr) _tls_start;
-	const __sz tbss_len  = (__uptr) _tls_end - (__uptr) _etdata;
-	const __sz padding   = ukarch_tls_area_size() - (tbss_len + tdata_len
-							 + TCB_SIZE);
+	const __sz tdata_len = (__uptr)_etdata - (__uptr)_tls_start;
+	const __sz tbss_len = (__uptr)_tls_end - (__uptr)_etdata;
+	const __sz padding =
+	    ukarch_tls_area_size() - (tbss_len + tdata_len + TCB_SIZE);
 
-	UK_ASSERT(IS_ALIGNED((__uptr) tls_area, ukarch_tls_area_align()));
+	UK_ASSERT(IS_ALIGNED((__uptr)tls_area, ukarch_tls_area_align()));
 
-	uk_pr_debug("tls_area_init: target: %p (%"__PRIsz" bytes)\n",
+	uk_pr_debug("tls_area_init: target: %p (%"__PRIsz
+		    " bytes)\n",
 		    tls_area, ukarch_tls_area_size());
-	uk_pr_debug("tls_area_init: copy (.tdata): %"__PRIsz" bytes\n",
+	uk_pr_debug("tls_area_init: copy (.tdata): %"__PRIsz
+		    " bytes\n",
 		    tdata_len);
-	uk_pr_debug("tls_area_init: uninitialized (.tbss): %"__PRIsz" bytes\n",
-		    (__sz) tbss_len);
-	uk_pr_debug("tls_area_init: pad: %"__PRIsz" bytes\n",
+	uk_pr_debug("tls_area_init: uninitialized (.tbss): %"__PRIsz
+		    " bytes\n",
+		    (__sz)tbss_len);
+	uk_pr_debug("tls_area_init: pad: %"__PRIsz
+		    " bytes\n",
 		    padding);
-	uk_pr_debug("tls_area_init: tcb: %"__PRIsz" bytes\n",
-		    (__sz) TCB_SIZE);
+	uk_pr_debug("tls_area_init: tcb: %"__PRIsz
+		    " bytes\n",
+		    (__sz)TCB_SIZE);
 	uk_pr_debug("tls_area_init: tcb self ptr: %p\n",
-		    (void *) ukarch_tls_tlsp(tls_area));
+		    (void *)ukarch_tls_tlsp(tls_area));
 
 	/* .tdata */
-	memcpy((void *)((__uptr) tls_area),
-	       _tls_start, tdata_len);
+	memcpy((void *)((__uptr)tls_area), _tls_start, tdata_len);
 
 #if CONFIG_LIBCONTEXT_CLEAR_TBSS
 	/* clear .tbss and padding */
-	memset((void *)((__uptr) tls_area + tdata_len),
-	       0x0, tbss_len + padding);
+	memset((void *)((__uptr)tls_area + tdata_len), 0x0, tbss_len + padding);
 #endif /* CONFIG_LIBCONTEXT_CLEAR_TBSS */
 
 	/* x86_64 ABI requires that fs:%0 contains the address of itself. */
-	*((__uptr *) ukarch_tls_tlsp(tls_area))
-		= (__uptr) ukarch_tls_tlsp(tls_area);
+	*((__uptr *)ukarch_tls_tlsp(tls_area)) =
+	    (__uptr)ukarch_tls_tlsp(tls_area);
 
 #if CONFIG_UKARCH_TLS_HAVE_TCB
-	ukarch_tls_tcb_init((void *) ukarch_tls_tlsp(tls_area));
+	ukarch_tls_tcb_init((void *)ukarch_tls_tlsp(tls_area));
 #endif /* CONFIG_UKARCH_TLS_HAVE_TCB */
 
 	uk_hexdumpCd(tls_area, ukarch_tls_area_size());

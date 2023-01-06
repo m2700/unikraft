@@ -56,9 +56,10 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
                              comp_num: int | None = None,
                              comp_map: Iterable[tuple[int | Sequence[int],
                                                       Iterable[str]]] | None = None,
-                             page_aligned: bool = False, extent_syms: bool = False,
+                             page_aligned: bool = False,
+                             inner_extent_syms: bool = False, outer_extent_syms: bool = False,
                              component_src: bool = False, keep_orig_target: bool = False,
-                             all_share_section: bool = False) -> str:
+                             all_share_section: bool = False, tbss: bool = False) -> str:
     s = ""
 
     if comp_num is not None:
@@ -97,15 +98,27 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
                                              for src_sec in src_sections)
 
         sec_inner = section_inner_script(lib_pats, comp_target_section, comp_src_sections,
-                                         extent_syms=extent_syms, keep_target=keep_target)
+                                         extent_syms=inner_extent_syms, keep_target=keep_target)
+
+        if outer_extent_syms:
+            if page_aligned:
+                s += f"{start_sym(comp_target_section)} = ALIGN(__PAGE_SIZE);\n"
+                s += ". = ALIGN(__PAGE_SIZE);\n"
+            else:
+                s += f"{start_sym(comp_target_section)} = .;\n"
 
         s += f"""\
 {comp_target_section} : {{
     {sec_inner}
 }}
 """
+
+        if tbss:
+            s += f". = ADDR({comp_target_section}) + SIZEOF({comp_target_section});\n"
         if page_aligned:
             s += ". = ALIGN(__PAGE_SIZE);\n"
+        if outer_extent_syms:
+            s += f"{end_sym(comp_target_section)} = .;\n"
 
     return s.strip()
 
@@ -147,32 +160,32 @@ def symlist_mapping_expr(comp_share: Iterable[int], comp_num: int) -> str:
 def generic_linker_defs(opt: argparse.Namespace) -> str:
     text_comp_sects = component_section_script(
         'text', ['text', 'text.*'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True,
+        page_aligned=True, outer_extent_syms=True, component_src=True,
         all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     rodata_comp_sects = component_section_script(
         'rodata', ['rodata', 'rodata.*'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True,
+        page_aligned=True, outer_extent_syms=True, component_src=True,
         all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     tdata_comp_sects = component_section_script(
         'tdata', ['tdata', 'tdata.*', 'gnu.linkonce.td.*'],
-        opt.comp_num, page_aligned=True, extent_syms=True, component_src=True,
+        opt.comp_num, page_aligned=True, outer_extent_syms=True, component_src=True,
         all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     tbss_comp_sects = component_section_script(
         'tbss', ['tbss', 'tbss.*', 'tcommon', 'gnu.linkonce.tb.*'],
-        opt.comp_num, page_aligned=True, extent_syms=True, component_src=True,
-        all_share_section=opt.all_share_section
+        opt.comp_num, page_aligned=True, outer_extent_syms=True, component_src=True,
+        all_share_section=opt.all_share_section, tbss=True
     ).replace('\n', '\t\\\n    ')
     data_comp_sects = component_section_script(
         'data', ['data', 'data.*'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True,
+        page_aligned=True, outer_extent_syms=True, component_src=True,
         all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
     bss_comp_sects = component_section_script(
         'bss', ['bss', 'bss.*', 'COMMON'], opt.comp_num,
-        page_aligned=True, extent_syms=True, component_src=True,
+        page_aligned=True, outer_extent_syms=True, component_src=True,
         all_share_section=opt.all_share_section
     ).replace('\n', '\t\\\n    ')
 
@@ -272,7 +285,8 @@ def symlist_impl(opt: argparse.Namespace) -> str:
     for comp_share in iter_component_tuples(opt.comp_num):
         for section in sections:
             for to_sym in [start_sym, end_sym]:
-                symbol_decls.append(f"extern char {to_sym(share_to_section_name(comp_share, section))}[];")
+                symbol_decls.append(
+                    f"extern char {to_sym(share_to_section_name(comp_share, section))}[];")
 
         mappings.append(f"{symlist_mapping_expr(comp_share, opt.comp_num)},")
     symbol_decls = "\n".join(symbol_decls)
