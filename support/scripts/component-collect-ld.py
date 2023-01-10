@@ -295,8 +295,10 @@ def symlist_impl(opt: argparse.Namespace) -> str:
     return f"""\
 #pragma once
 
+#define UK_COMPONENT_COUNT {opt.comp_num}
+
 struct share_extent_mapping {{
-    unsigned share[{opt.comp_num}];
+    unsigned share[UK_COMPONENT_COUNT];
     {extent_attrs}
 }};
 
