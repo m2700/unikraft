@@ -144,4 +144,11 @@ if LIBUKBOOT
 	config LIBUKBOOT_TIMESTAMP
 	bool "Enable time stamp creation for beginning and end of boot"
 	depends on ARCH_X86_64 && PLAT_KVM
+
+	config LIBUKBOOT_INIT_EPT_ISOLATION
+	bool "Enable isolation of components using EPTs"
+	default n
+	depends on ARCH_X86_64 && PLAT_KVM && COMPONENT_SPLITTING && LIBEPTUTIL_INCLUDED
+	select LIBEPTUTIL
+	select VMFUNC0_TRAMPOLINES
 endif

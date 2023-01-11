@@ -14,18 +14,11 @@
 #define UK_COMPONENT UK_LIB_COMPONENT(__LIBNAME__)
 
 #ifdef CONFIG_COMPONENT_SPLITTING
-
-#define UK_COMP_LIB_SECTION(lib, dot, section)                                           \
+#define UK_COMP_LIB_SECTION(lib, dot, section)                                 \
 	__section(".component" STRINGIFY(UK_LIB_COMPONENT(lib)) "." section)
-
-#define UK_COMP_SHARE_SECTION(share, dot, section)                                       \
+#define UK_COMP_SHARE_SECTION(share, dot, section)                             \
 	__section("." STRINGIFY(share) "." section)
-
 #else // CONFIG_COMPONENT_SPLITTING
-
 #define UK_COMP_LIB_SECTION(lib, dot, section) __section(dot section)
-
-#define UK_COMP_SHARE_SECTION(share, dot, section)                                       \
-	__section(dot section)
-
+#define UK_COMP_SHARE_SECTION(share, dot, section) __section(dot section)
 #endif // CONFIG_COMPONENT_SPLITTING
