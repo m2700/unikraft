@@ -119,6 +119,12 @@
 	pte_fill \paddr, \pages, PT_LVL, \pte
 .endm
 
+#ifdef CONFIG_COMPONENT_SPLITTING
+.section .shared.text
+#else
+.section .text
+#endif /* CONFIG_COMPONENT_SPLITTING */
+
 /* x86-64 Boot Page Table
  *
  * We map the first 4GB using max 2MB pages to keep compatibility for systems
