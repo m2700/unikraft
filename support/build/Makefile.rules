@@ -898,6 +898,41 @@ $(error preprule_$(call fileext,$(strip $(2))) is not defined: Failed to install
 $(call preprule_$(call fileext,$(strip $(2))),$(strip $(1)),$(strip $(2)),$(strip $(3)),$(strip $(4)),$(strip $(5)))
 endef
 
+# generate_component_linker_defines $platname $max-component-id
+define generate_component_linker_defines
+$(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
+$(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h: $(SCRIPTS_DIR)/component-collect-ld.py
+	$(call verbose_cmd,MK-LD,$(notdir $$@),\
+		$(SCRIPTS_DIR)/component-collect-ld.py defs -a $$$$(($(2) + 1)) > $$@)
+UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
+UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
+endef
+
+# generate_component_section_remap_script $platname $libnames
+define generate_component_section_remap_script
+$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld: $(SCRIPTS_DIR)/component-collect-ld.py
+	$(call verbose_cmd,MK-LD,$(notdir $$@),\
+		$(SCRIPTS_DIR)/component-collect-ld.py remap -ks \
+			$(foreach L,$(2),$(strip \
+				$(if $(call libname2olib_if_exists,$(L)),\
+					$(call libname2olib,$(L))=$(call lib_component,$(L))))) \
+			> $$@
+	)
+UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
+UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
+$(call uc,$(1))_LIBLDFLAGS-$(CONFIG_COMPONENT_SPLITTING) += -T$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
+endef
+
+# generate_component_symlist $platname $max-component-id
+define generate_component_symlist
+$(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
+$(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h: $(SCRIPTS_DIR)/component-collect-ld.py
+	$(call verbose_cmd,MK-LD,$(notdir $$@),\
+		$(SCRIPTS_DIR)/component-collect-ld.py symlist $$$$(($(2) + 1)) > $$@)
+UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h
+UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h
+endef
+
 
 #################################################
 #
@@ -1035,41 +1070,6 @@ $(1): $(call libname2olib,$(1))
 $(1).bc: $(call libname2bclib,$(1))
 
 .PHONY: $(1)
-endef
-
-# generate_component_linker_defines $platname $max-component-id
-define generate_component_linker_defines
-$(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
-$(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h: $(SCRIPTS_DIR)/component-collect-ld.py
-	$(call verbose_cmd,MK-LD,$(notdir $$@),\
-		$(SCRIPTS_DIR)/component-collect-ld.py defs -a $$$$(($(2) + 1)) > $$@)
-UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
-UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
-endef
-
-# generate_component_section_remap_script $platname $libnames
-define generate_component_section_remap_script
-$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld: $(SCRIPTS_DIR)/component-collect-ld.py
-	$(call verbose_cmd,MK-LD,$(notdir $$@),\
-		$(SCRIPTS_DIR)/component-collect-ld.py remap -ks \
-			$(foreach L,$(2),$(strip \
-				$(if $(call libname2olib_if_exists,$(L)),\
-					$(call libname2olib,$(L))=$(call lib_component,$(L))))) \
-			> $$@
-	)
-UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
-UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
-$(call uc,$(1))_LIBLDFLAGS-$(CONFIG_COMPONENT_SPLITTING) += -T$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld
-endef
-
-# generate_component_symlist $platname $max-component-id
-define generate_component_symlist
-$(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
-$(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h: $(SCRIPTS_DIR)/component-collect-ld.py
-	$(call verbose_cmd,MK-LD,$(notdir $$@),\
-		$(SCRIPTS_DIR)/component-collect-ld.py symlist $$$$(($(2) + 1)) > $$@)
-UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h
-UK_CLEAN-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/component-symlist.h
 endef
 
 #################################################
