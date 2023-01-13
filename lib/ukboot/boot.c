@@ -85,14 +85,16 @@
 #include "banner.h"
 
 #ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
-#define __HEADER_LIBNAME__ libukboot_main
-#include <uk/header-component.h>
+#define __SRC_LIBNAME__ libukboot_main
+#include <uk/trampoline-share.h>
 #endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
+
 
 int main(int argc, char *argv[]) __weak;
 
-#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
-TRAMPOLINE(main, (int argc, char *argv[]))
+#if defined(CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION)                               \
+    && UK_COMPONENT != UK_SRC_COMPONENT
+STATIC_TRAMPOLINE(main, (int argc, char *argv[]))
 #define main __tr_main
 #endif // CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
 
@@ -135,7 +137,8 @@ void ukplat_entry(int argc, char *argv[])
 
 	uk_pr_info("Unikraft constructor table at %p - %p\n",
 		   &uk_ctortab_start[0], &uk_ctortab_end);
-	uk_ctortab_foreach(ctorfn, uk_ctortab_start, uk_ctortab_end) {
+	uk_ctortab_foreach(ctorfn, uk_ctortab_start, uk_ctortab_end)
+	{
 		UK_ASSERT(*ctorfn);
 		uk_pr_debug("Call constructor: %p())...\n", *ctorfn);
 		(*ctorfn)();
@@ -156,11 +159,13 @@ void ukplat_entry(int argc, char *argv[])
 	 * FIXME: allocators are hard-coded for now
 	 */
 	uk_pr_info("Initialize memory allocator...\n");
-	ukplat_memregion_foreach(&md, UKPLAT_MEMRF_ALLOCATABLE) {
+	ukplat_memregion_foreach(&md, UKPLAT_MEMRF_ALLOCATABLE)
+	{
 #if CONFIG_UKPLAT_MEMRNAME
-		uk_pr_debug("Try memory region: %p - %p (flags: 0x%02x, name: %s)...\n",
-			    md.base, (void *)((size_t)md.base + md.len),
-			    md.flags, md.name);
+		uk_pr_debug(
+		    "Try memory region: %p - %p (flags: 0x%02x, name: %s)...\n",
+		    md.base, (void *)((size_t)md.base + md.len), md.flags,
+		    md.name);
 #else
 		uk_pr_debug("Try memory region: %p - %p (flags: 0x%02x)...\n",
 			    md.base, (void *)((size_t)md.base + md.len),
@@ -196,13 +201,12 @@ void ukplat_entry(int argc, char *argv[])
 	else {
 		rc = ukplat_memallocator_set(a);
 		if (unlikely(rc != 0))
-			UK_CRASH("Could not set the platform memory allocator\n");
+			UK_CRASH(
+			    "Could not set the platform memory allocator\n");
 	}
 
 	/* Allocate a TLS for this execution context */
-	tls = uk_memalign(a,
-			  ukarch_tls_area_align(),
-			  ukarch_tls_area_size());
+	tls = uk_memalign(a, ukarch_tls_area_align(), ukarch_tls_area_size());
 	if (!tls)
 		UK_CRASH("Failed to allocate and initialize TLS\n");
 
@@ -242,9 +246,10 @@ void ukplat_entry(int argc, char *argv[])
 	/**
 	 * Run init table
 	 */
-	uk_pr_info("Init Table @ %p - %p\n",
-		   &uk_inittab_start[0], &uk_inittab_end);
-	uk_inittab_foreach(initfn, uk_inittab_start, uk_inittab_end) {
+	uk_pr_info("Init Table @ %p - %p\n", &uk_inittab_start[0],
+		   &uk_inittab_end);
+	uk_inittab_foreach(initfn, uk_inittab_start, uk_inittab_end)
+	{
 		UK_ASSERT(*initfn);
 		uk_pr_debug("Call init function: %p()...\n", *initfn);
 		rc = (*initfn)();
@@ -272,10 +277,10 @@ void ukplat_entry(int argc, char *argv[])
 	 * mimic what a regular user application (e.g., BSD, Linux) would expect
 	 * from its OS being initialized.
 	 */
-	uk_pr_info("Pre-init table at %p - %p\n",
-		   &__preinit_array_start[0], &__preinit_array_end);
-	uk_ctortab_foreach(ctorfn,
-			   __preinit_array_start, __preinit_array_end) {
+	uk_pr_info("Pre-init table at %p - %p\n", &__preinit_array_start[0],
+		   &__preinit_array_end);
+	uk_ctortab_foreach(ctorfn, __preinit_array_start, __preinit_array_end)
+	{
 		if (!*ctorfn)
 			continue;
 
@@ -283,9 +288,10 @@ void ukplat_entry(int argc, char *argv[])
 		(*ctorfn)();
 	}
 
-	uk_pr_info("Constructor table at %p - %p\n",
-		   &__init_array_start[0], &__init_array_end);
-	uk_ctortab_foreach(ctorfn, __init_array_start, __init_array_end) {
+	uk_pr_info("Constructor table at %p - %p\n", &__init_array_start[0],
+		   &__init_array_end);
+	uk_ctortab_foreach(ctorfn, __init_array_start, __init_array_end)
+	{
 		if (!*ctorfn)
 			continue;
 
