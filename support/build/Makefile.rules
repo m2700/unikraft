@@ -91,6 +91,10 @@ $(if $(call qstrip,$($(call uc,$(1))_OBJS) $($(call uc,$(1))_OBJS-y)),\
 $(call libname2olib,$(1))))
 endef
 
+libname2trsyms = $(addprefix $(BUILD_DIR)/,$(addsuffix /trampoline_syms.uk,$(1)))
+
+libname2redeftrs = $(addprefix $(BUILD_DIR)/,$(addsuffix /trampoline_redefs.uk,$(1)))
+
 # converts a list of sources to paths pointing to their corresponding destination files
 # src2dst $libname,$source(s),$destsuffix,$variant(optional)
 define src2dst =
@@ -247,6 +251,7 @@ $(eval $(call uc,$(1))_BASE    := $(_IMPORT_BASE))
 $(eval $(call uc,$(1))_BUILD   := $(BUILD_DIR)/$(1))
 $(eval $(call uc,$(1))_EXPORTS += $(wildcard $(_IMPORT_BASE)/exportsyms.uk))
 $(eval $(call uc,$(1))_LOCALS  += $(wildcard $(_IMPORT_BASE)/localsyms.uk))
+$(eval $(call uc,$(1))_REDEFS  += $(wildcard $(_IMPORT_BASE)/renamesyms.uk))
 endef
 
 # addlib_s $libname,$switch
@@ -265,6 +270,7 @@ $(eval $(call uc,$(2))_BASE    := $(_IMPORT_BASE))
 $(eval $(call uc,$(2))_BUILD   := $(BUILD_DIR)/$(2))
 $(eval $(call uc,$(2))_EXPORTS += $(wildcard $(_IMPORT_BASE)/exportsyms.uk))
 $(eval $(call uc,$(2))_LOCALS  += $(wildcard $(_IMPORT_BASE)/localsyms.uk))
+$(eval $(call uc,$(1))_REDEFS  += $(wildcard $(_IMPORT_BASE)/renamesyms.uk))
 endef
 
 # addplatlib_s $platname,$libname,$switch
@@ -1045,14 +1051,29 @@ $(call libname2preolib,$(1)): $$($(call vprefix_lib,$(1),OBJS)) \
 		      -Wl$(comma)--end-group \
 		      -o $(call libname2preolib,$(1)))
 
+$(call libname2trsyms,$(1)): $(call libname2preolib,$(1))
+	$(call build_cmd,NM,$(1),$(call libname2trsyms,$(1)),\
+		$(NM) -f just-symbols --quiet -u $(call libname2preolib,$(1)) \
+			| $(SED) -ne 's/^__tr_escape_//p' \
+			> $(call libname2trsyms,$(1)))
+
+$(call libname2redeftrs,$(1)): $(call libname2trsyms,$(1))
+	$(call build_cmd,SED,$(1),$(call libname2redeftrs,$(1)),\
+		$(SED) -ne 's/^\(..*\)/\1=__tr_\1\n__tr_escape_\1=\1/p' $(call libname2trsyms,$(1)) \
+			> $(call libname2redeftrs,$(1)))
+
 $(call libname2olib,$(1)): $(call libname2preolib,$(1)) \
 			   $$($(call vprefix_lib,$(1),EXPORTS)) $$($(call vprefix_lib,$(1),EXPORTS-y)) \
 			   $$($(call vprefix_lib,$(1),LOCALS)) $$($(call vprefix_lib,$(1),LOCALS-y)) \
-			   $$(EACHOLIB_LOCALS) $$(EACHOLIB_LOCALS-y)
+			   $$(EACHOLIB_LOCALS) $$(EACHOLIB_LOCALS-y) \
+			   $$($(call vprefix_lib,$(1),REDEFS)) $$($(call vprefix_lib,$(1),REDEFS-y)) \
+			   $$(EACHOLIB_REDEFS) $$(EACHOLIB_REDEFS-y)
 	$(call build_cmd,OBJCOPY,,$(call libname2olib,$(1)),\
 		$(OBJCOPY) $$(addprefix --keep-global-symbols=,$$($(call vprefix_lib,$(1),EXPORTS)) $$($(call vprefix_lib,$(1),EXPORTS-y))) \
 			   $$(addprefix --localize-symbols=,$$($(call vprefix_lib,$(1),LOCALS)) $$($(call vprefix_lib,$(1),LOCALS-y))) \
 			   $$(addprefix --localize-symbols=,$$(EACHOLIB_LOCALS) $$(EACHOLIB_LOCALS-y)) \
+			   $$(addprefix --redefine-syms=,$$($(call vprefix_lib,$(1),REDEFS)) $$($(call vprefix_lib,$(1),REDEFS-y))) \
+			   $$(addprefix --redefine-syms=,$$(EACHOLIB_REDEFS) $$(EACHOLIB_REDEFS-y)) \
 		           $$(OBJCFLAGS) $$(OBJCFLAGS-y) \
 		           $$($(call vprefix_lib,$(1),OBJCFLAGS)) $$($(call vprefix_lib,$(1),OBJCFLAGS-y)) \
 			   $(call libname2preolib,$(1)) $(call libname2olib,$(1)))
@@ -1068,9 +1089,17 @@ $(call libname2bclib,$(1)): $($(call vprefix_lib,$(1),BC_OBJS)) \
 		        $(EACHOLIB_BC_OBJS-y) \
 		        -o $(call libname2bclib,$(1)))
 
+$(eval $(call vprefix_lib,$(1),LOCALS-$(CONFIG_VMFUNC0_TRAMPOLINES)) += $(call libname2trsyms,$(1)))
+$(eval $(call vprefix_lib,$(1),REDEFS-$(CONFIG_VMFUNC0_TRAMPOLINES)) += $(call libname2redeftrs,$(1)))
+
 $(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call libname2preolib,$(1))))
 $(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call libname2olib,$(1))))
 $(eval $(call vprefix_lib,$(1),CLEAN-y) += $(call build_clean,$(call libname2bclib,$(1))))
+$(eval $(call vprefix_lib,$(1),CLEAN-$(CONFIG_VMFUNC0_TRAMPOLINES)) += \
+	$(call build_clean,$(call libname2trsyms,$(1))))
+$(eval $(call vprefix_lib,$(1),CLEAN-$(CONFIG_VMFUNC0_TRAMPOLINES)) += \
+	$(call build_clean,$(call libname2redeftrs,$(1))))
+
 
 $(1): $(call libname2olib,$(1))
 $(1).bc: $(call libname2bclib,$(1))
