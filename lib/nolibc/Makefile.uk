@@ -47,5 +47,8 @@ LIBNOLIBC_SRCS-y += $(LIBNOLIBC_BASE)/asprintf.c
 
 LIBNOLIBC_SRCS-y += $(LIBNOLIBC_BASE)/qsort.c
 
+EACHOLIB_SRCS-$(call and_yn,$(CONFIG_LIBNOLIBC),$(CONFIG_VMFUNC0_TRAMPOLINES)) += \
+	$(LIBNOLIBC_BASE)/trampolines.c|libnolibc
+
 # Localize internal symbols (starting with __*)
 LIBNOLIBC_OBJCFLAGS-y += -w -L __*
