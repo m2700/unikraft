@@ -94,8 +94,10 @@ SECTIONS
 	 */
 	.intrstack :
 	{
+		__intrstack_start = .;
 		*(.intrstack)
 		. = ALIGN(__PAGE_SIZE);
+		__intrstack_end = .;
 	}
 
 	_end = .;
