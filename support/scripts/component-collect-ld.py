@@ -59,7 +59,7 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
                              page_aligned: bool = False,
                              inner_extent_syms: bool = False, outer_extent_syms: bool = False,
                              component_src: bool = False, keep_orig_target: bool = False,
-                             all_share_section: bool = False, tbss: bool = False) -> str:
+                             collect_share_section: bool = False, tbss: bool = False) -> str:
     s = ""
 
     if comp_num is not None:
@@ -71,9 +71,12 @@ def component_section_script(target_section: str, src_sections: Iterable[str],
         comp_map = itertools.chain(comp_map, [(None, {"*"})])
 
     full_comp_share = None
-    if all_share_section:
+    if collect_share_section:
         assert comp_num is not None and component_src
         full_comp_share = tuple(range(comp_num))
+    
+    if comp_map is None:
+        comp_map = [(None, {"*"})]
 
     for comp_share, lib_pats in comp_map:
         comp_src_sections = src_sections
@@ -161,32 +164,32 @@ def generic_linker_defs(opt: argparse.Namespace) -> str:
     text_comp_sects = component_section_script(
         'text', ['text', 'text.*'], opt.comp_num,
         page_aligned=True, outer_extent_syms=True, component_src=True,
-        all_share_section=opt.all_share_section
+        collect_share_section=opt.collect_share_section
     ).replace('\n', '\t\\\n    ')
     rodata_comp_sects = component_section_script(
         'rodata', ['rodata', 'rodata.*'], opt.comp_num,
         page_aligned=True, outer_extent_syms=True, component_src=True,
-        all_share_section=opt.all_share_section
+        collect_share_section=opt.collect_share_section
     ).replace('\n', '\t\\\n    ')
     tdata_comp_sects = component_section_script(
         'tdata', ['tdata', 'tdata.*', 'gnu.linkonce.td.*'],
         opt.comp_num, page_aligned=True, outer_extent_syms=True, component_src=True,
-        all_share_section=opt.all_share_section
+        collect_share_section=opt.collect_share_section
     ).replace('\n', '\t\\\n    ')
     tbss_comp_sects = component_section_script(
         'tbss', ['tbss', 'tbss.*', 'tcommon', 'gnu.linkonce.tb.*'],
         opt.comp_num, page_aligned=True, outer_extent_syms=True, component_src=True,
-        all_share_section=opt.all_share_section, tbss=True
+        collect_share_section=opt.collect_share_section, tbss=True
     ).replace('\n', '\t\\\n    ')
     data_comp_sects = component_section_script(
         'data', ['data', 'data.*'], opt.comp_num,
         page_aligned=True, outer_extent_syms=True, component_src=True,
-        all_share_section=opt.all_share_section
+        collect_share_section=opt.collect_share_section
     ).replace('\n', '\t\\\n    ')
     bss_comp_sects = component_section_script(
         'bss', ['bss', 'bss.*', 'COMMON'], opt.comp_num,
         page_aligned=True, outer_extent_syms=True, component_src=True,
-        all_share_section=opt.all_share_section
+        collect_share_section=opt.collect_share_section
     ).replace('\n', '\t\\\n    ')
 
     header_s = f"""\
@@ -227,29 +230,34 @@ def link_remap_sections(opt: argparse.Namespace) -> str:
             lib = f"{lib[:-1]}[{lib[-1]}]"
         comp_lib_map.setdefault(int(comp), set()).add(lib)
 
+    comp_lib_map = sorted(comp_lib_map.items(), key=lambda lcp: lcp[0])
+
     text_comp_sects = component_section_script(
         'text', ['.text', '.text.*'],
-        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
+        comp_map=comp_lib_map, keep_orig_target=opt.keep_remapped
+    ).replace('\n', '\n    ')
+    rodata_shared_sect = component_section_script(
+        'shared.rodata', ['.rodata.str1.1']
     ).replace('\n', '\n    ')
     rodata_comp_sects = component_section_script(
         'rodata', ['.rodata', '.rodata.*'],
-        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
+        comp_map=comp_lib_map, keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     tdata_comp_sects = component_section_script(
         'tdata', ['.tdata', '.tdata.*', '.gnu.linkonce.td.*'],
-        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
+        comp_map=comp_lib_map, keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     tbss_comp_sects = component_section_script(
         'tbss', ['.tbss', '.tbss.*', '.tcommon', '.gnu.linkonce.tb.*'],
-        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
+        comp_map=comp_lib_map, keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     data_comp_sects = component_section_script(
         'data', ['.data', '.data.*'],
-        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
+        comp_map=comp_lib_map, keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
     bss_comp_sects = component_section_script(
         'bss', ['.bss', '.bss.*', 'COMMON'],
-        comp_map=comp_lib_map.items(), keep_orig_target=opt.keep_remapped
+        comp_map=comp_lib_map, keep_orig_target=opt.keep_remapped
     ).replace('\n', '\n    ')
 
     link_s = f"""\
@@ -257,6 +265,7 @@ SECTIONS
 {{
     {text_comp_sects}
 
+    {rodata_shared_sect}
     {rodata_comp_sects}
 
     {tdata_comp_sects}
@@ -322,7 +331,7 @@ def main():
     symlist_parser = subparsers.add_parser(
         "symlist", help="Generate C array, containing a mapping of component shares to extent symbols")
 
-    defs_parser.add_argument('-a', '--all-share-section',
+    defs_parser.add_argument('-a', '--collect-share-section',
                              action='store_true')
     defs_parser.add_argument("comp_num", help="Number of components",
                              metavar='component-count', type=int)
@@ -334,7 +343,7 @@ def main():
     remap_parser.add_argument("-k", "--keep-remapped", action="store_true")
     remap_parser.add_argument(
         'lib_comp_mappings', metavar='library.o=component-id', nargs='*', type=str,
-        help='Library Component mappings'
+        help='Library Component Mappings'
     )
 
     symlist_parser.add_argument(
