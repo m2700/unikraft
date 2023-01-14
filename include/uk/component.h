@@ -3,6 +3,10 @@
 #include <uk/config.h>
 #include <uk/essentials.h>
 
+#ifndef __LIBNAME__
+#error "__LIBNAME__ not defined"
+#endif
+
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define __UK_LIB_COMPONENT(lib) __##lib##_COMPONENT__
 #else // CONFIG_COMPONENT_SPLITTING
