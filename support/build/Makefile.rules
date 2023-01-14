@@ -1034,7 +1034,7 @@ $(call libname2trsyms,$(1)): $(call libname2preolib,$(1))
 
 $(call libname2redeftrs,$(1)): $(call libname2trsyms,$(1))
 	$(call build_cmd,SED,$(1),$(call libname2redeftrs,$(1)),\
-		$(SED) -ne 's/^\(..*\)/\1=__tr_\1\n__tr_escape_\1=\1/p' $(call libname2trsyms,$(1)) \
+		$(SED) -ne 's/^\(..*\)/\1 __tr_\1\n__tr_escape_\1 \1/p' $(call libname2trsyms,$(1)) \
 			> $(call libname2redeftrs,$(1)))
 
 $(call libname2olib,$(1)): $(call libname2preolib,$(1)) \
