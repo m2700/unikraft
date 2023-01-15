@@ -164,6 +164,11 @@ define add_component_share =
 $(call global_define_s,$(1),component$(call component_share_id,$(2)),$(CONFIG_COMPONENT_SPLITTING))
 endef
 
+# add_component_share $owner-libname,$sharename,$share-libnames
+define add_lib_component_share =
+$(call local_define_s,$(1),$(2),component$(call component_share_id,$(3)),$(CONFIG_COMPONENT_SPLITTING))
+endef
+
 ################################################################################
 #
 # Variable name prefixes
