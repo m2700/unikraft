@@ -308,7 +308,7 @@ void ukplat_entry(int argc, char *argv[])
 	uk_pr_info("])\n");
 
 #ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
-	eptlib_kvm_init_ept_section_isolation();
+	eptlib_kvm_init_ept_section_isolation(UK_COMPONENT);
 #endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
 
 #ifdef CONFIG_LIBUKBOOT_TIMESTAMP
