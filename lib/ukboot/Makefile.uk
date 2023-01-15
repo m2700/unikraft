@@ -20,3 +20,5 @@ endif
 # v9. But we have to deal with it now.
 $(eval $(call addlib_s,libukboot_main,$(CONFIG_LIBUKBOOT)))
 LIBUKBOOT_MAIN_SRCS-y += $(LIBUKBOOT_BASE)/weak_main.c
+
+LIBEPTUTIL_INIT_SHARE += $(call lib_component,libukboot)
