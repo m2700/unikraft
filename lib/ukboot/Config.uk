@@ -117,6 +117,7 @@ if LIBUKBOOT
 		bool "splinter alloc"
 		depends on LIBSPLINTERALLOC_INCLUDED
 		select LIBSPLINTERALLOC
+		select LIBUKBOOT_INIT_EPT_ISOLATION
 		help
 		  Linked List Allocator, supporting efficient dynamic regions.
 
