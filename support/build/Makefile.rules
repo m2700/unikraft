@@ -921,8 +921,7 @@ endef
 # generate_component_linker_defines $platname $max-component-id
 define generate_component_linker_defines
 $(call mk_sub_build_dir,include/uk/$(call lc,$(1)))
-$(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h: \
-			$(SCRIPTS_DIR)/component-collect-ld.py $$(UK_OLIBS) $$(UK_OLIBS-y)
+$(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h: $(SCRIPTS_DIR)/component-collect-ld.py
 	$(call verbose_cmd,MK-LD,$(notdir $$@),\
 		$(SCRIPTS_DIR)/component-collect-ld.py defs -a $$$$(($(2) + 1)) > $$@)
 UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/include/uk/$(call lc,$(1))/components.lds.h
@@ -931,8 +930,7 @@ endef
 
 # generate_component_section_remap_script $platname $libnames
 define generate_component_section_remap_script
-$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld: \
-			$(SCRIPTS_DIR)/component-collect-ld.py $$(UK_OLIBS) $$(UK_OLIBS-y)
+$(BUILD_DIR)/$(call lc,$(1))-component-remap.ld: $(SCRIPTS_DIR)/component-collect-ld.py
 	$(call verbose_cmd,MK-LD,$(notdir $$@),\
 		$(SCRIPTS_DIR)/component-collect-ld.py remap -ks \
 			$(foreach L,$(2),$(strip \
