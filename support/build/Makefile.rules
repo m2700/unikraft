@@ -145,18 +145,21 @@ endef
 #
 ################################################################################
 
-# lib_component $libname
-define lib_component =
-$(strip $(if $(call qstrip,$($(call vprefix_lib,$(1),COMPONENT))),\
-$($(call vprefix_lib,$(1),COMPONENT)),\
-$(if $(call qstrip,$($(call vprefix_lib,$(1),COMPONENT-y))),\
-$($(call vprefix_lib,$(1),COMPONENT-y)),\
-$(UK_DEFAULT_COMPONENT))))
+# lib_components $libname
+define lib_components =
+$(strip $(if $(call qstrip,$($(call vprefix_lib,$(1),COMPONENTS)) $($(call vprefix_lib,$(1),COMPONENTS-y))),\
+$($(call vprefix_lib,$(1),COMPONENTS)) $($(call vprefix_lib,$(1),COMPONENTS-y)),\
+$(UK_DEFAULT_COMPONENTS)))
+endef
+
+# lib_main_component $libname
+define lib_main_component =
+$(firstword $(call lib_components,$(1)))
 endef
 
 # component_share_id $libnames
 define component_share_id =
-$(subst $(space),_,$(call sort_num,$(foreach L,$(1),$(call lib_component,$(L)))))
+$(subst $(space),_,$(call sort_num,$(foreach L,$(1),$(call lib_components,$(L)))))
 endef
 
 # add_component_share $sharename,$libnames
@@ -907,7 +910,7 @@ $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld: $(SCRIPTS_DIR)/component-collec
 		$(SCRIPTS_DIR)/component-collect-ld.py remap -ks \
 			$(foreach L,$(2),$(strip \
 				$(if $(call libname2olib_if_exists,$(L)),\
-					$(call libname2olib,$(L))=$(call lib_component,$(L))))) \
+					$(call libname2olib,$(L))=$(call component_share_id,$(L))))) \
 			> $$@
 	)
 UK_PREPARE-$(CONFIG_COMPONENT_SPLITTING) += $(BUILD_DIR)/$(call lc,$(1))-component-remap.ld

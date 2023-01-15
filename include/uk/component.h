@@ -9,13 +9,17 @@
 
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define __UK_LIB_COMPONENT(lib) __##lib##_COMPONENT__
+#define __UK_LIB_SHARE(lib) __##lib##_SHARE__
 #else // CONFIG_COMPONENT_SPLITTING
 #define __UK_LIB_COMPONENT(lib) 0
+#define __UK_LIB_SHARE(lib) 0
 #endif // CONFIG_COMPONENT_SPLITTING
 
 #define UK_LIB_COMPONENT(lib) __UK_LIB_COMPONENT(lib)
+#define UK_LIB_SHARE(lib) __UK_LIB_SHARE(lib)
 
 #define UK_COMPONENT UK_LIB_COMPONENT(__LIBNAME__)
+#define UK_SHARE UK_LIB_SHARE(__LIBNAME__)
 
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define UK_COMP_LIB_SECTION(lib, dot, section)                                 \
