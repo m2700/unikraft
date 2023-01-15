@@ -228,7 +228,7 @@ def link_remap_sections(opt: argparse.Namespace) -> str:
         if opt.single_match_location:
             assert (not opt.wildcard_location)
             lib = f"{lib[:-1]}[{lib[-1]}]"
-        comp_lib_map.setdefault(int(comp), set()).add(lib)
+        comp_lib_map.setdefault(tuple(map(int, comp.split("_"))), set()).add(lib)
 
     comp_lib_map = sorted(comp_lib_map.items(), key=lambda lcp: lcp[0])
 

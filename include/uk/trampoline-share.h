@@ -1,6 +1,8 @@
 #include <uk/config.h>
 
-#ifdef __SRC_LIBNAME__
+#ifndef __SRC_LIBNAME__
+#error "__SRC_LIBNAME__ is not defined"
+#endif // __SRC_LIBNAME__
 
 #ifdef UK_SRC_COMPONENT
 #undef UK_SRC_COMPONENT
@@ -25,5 +27,3 @@
 #else
 #define UK_TRAMPOLINE_SHARE UK_CONCAT(component, UK_COMPONENT)
 #endif
-
-#endif // __SRC_LIBNAME__

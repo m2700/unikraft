@@ -347,7 +347,7 @@ EACHOLIB_LOCALS :=
 EACHOLIB_LOCALS-y :=
 EACHOLIB_REDEFS :=
 EACHOLIB_REDEFS-y :=
-UK_DEFAULT_COMPONENT := 0
+UK_DEFAULT_COMPONENTS = 0
 
 # Pull in the user's configuration file
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
@@ -1023,10 +1023,10 @@ print-components:
 		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),\
 		$(if $(call qstrip,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y)),\
 		$(foreach L,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y), \
-		'$(L): $(call lib_component,$(L))\n' \
+		'$(L): $(call lib_components,$(L))\n' \
 		)))\
 		$(foreach L,$(UK_LIBS) $(UK_LIBS-y),\
-		'$(L): $(call lib_component,$(L))\n' \
+		'$(L): $(call lib_components,$(L))\n' \
 		)
 else
 print-libs:
