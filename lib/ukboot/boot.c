@@ -274,8 +274,8 @@ void ukplat_entry(int argc, char *argv[])
 #elif CONFIG_LIBUKBOOT_INITTINYALLOC
 			a = uk_tinyalloc_init(md.base, md.len);
 #elif CONFIG_LIBUKBOOT_INITSPLINTERALLOC
-			uk_splinteralloc_setup(md.base, md.len, UK_COMPONENT);
-			a = uk_splinteralloc_init(0);
+			uk_splinteralloc_setup(md.base, md.len);
+			a = uk_splinteralloc_init_private();
 #endif
 		} else {
 			uk_alloc_addmem(a, md.base, md.len);
