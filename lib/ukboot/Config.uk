@@ -114,7 +114,7 @@ if LIBUKBOOT
 		select LIBTLSF
 
 		config LIBUKBOOT_INITSPLINTERALLOC
-		bool "splinter alloc"
+		bool "Splinter-Alloc"
 		depends on LIBSPLINTERALLOC_INCLUDED
 		select LIBSPLINTERALLOC
 		select LIBUKBOOT_INIT_EPT_ISOLATION
