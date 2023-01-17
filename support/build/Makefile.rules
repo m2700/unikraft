@@ -167,14 +167,29 @@ define component_share_id =
 $(subst $(space),_,$(call sort_num,$(foreach L,$(1),$(call lib_components,$(L)))))
 endef
 
+# component_share_array $libnames
+define component_share_array =
+$(subst $(space),$(comma),$(call sort_num,$(foreach L,$(1),$(call lib_components,$(L)))))
+endef
+
 # add_component_share $sharename,$libnames
 define add_component_share =
 $(call global_define_s,$(1),component$(call component_share_id,$(2)),$(CONFIG_COMPONENT_SPLITTING))
 endef
 
-# add_component_share $owner-libname,$sharename,$share-libnames
+# add_component_share_array $sharename,$libnames
+define add_component_share_array =
+$(call global_define_s,$(1),component$(call component_share_array,$(2)),$(CONFIG_COMPONENT_SPLITTING))
+endef
+
+# add_lib_component_share $owner-libname,$sharename,$share-libnames
 define add_lib_component_share =
 $(call local_define_s,$(1),$(2),component$(call component_share_id,$(3)),$(CONFIG_COMPONENT_SPLITTING))
+endef
+
+# add_lib_component_share_array $owner-libname,$sharename,$share-libnames
+define add_lib_component_share_array =
+$(call local_define_s,$(1),$(2),component$(call component_share_array,$(3)),$(CONFIG_COMPONENT_SPLITTING))
 endef
 
 ################################################################################
