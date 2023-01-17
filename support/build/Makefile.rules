@@ -58,6 +58,9 @@ and_yn = $(if $(filter yy,$(1)$(2)),y,n)
 # all $y/n, $y/n
 or_yn = $(if $(strip $(filter y,$(1) $(2))),y,n)
 
+# not $y/n
+not_yn = $(if $(filter y,$(1)),n,y)
+
 # sort_num $list
 sort_num = $(shell printf "%s\n" $(sort $(1)) | sort -bn)
 
