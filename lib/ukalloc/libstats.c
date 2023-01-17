@@ -50,6 +50,11 @@
 
 static inline struct uk_alloc *_uk_alloc_get_actual_default(void)
 {
+#if CONFIG_LIBUKALLOC_LAZY_DEFAULT_INIT
+	if (!_uk_alloc_head) {
+		return uk_allocator_init();
+	}
+#endif
 	return _uk_alloc_head;
 }
 

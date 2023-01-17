@@ -39,12 +39,16 @@
 #include <uk/assert.h>
 #include <uk/essentials.h>
 #include <errno.h>
+#include <uk/component-local.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct uk_alloc;
+
+/// Provided by allocator library
+struct uk_alloc *uk_allocator_init(void);
 
 typedef void* (*uk_alloc_malloc_func_t)
 		(struct uk_alloc *a, __sz size);
@@ -121,6 +125,10 @@ struct uk_alloc {
 	__u8 priv[];
 };
 
+#if CONFIG_LIBUKALLOC_COMPONENT_WISE
+#define _uk_alloc_head UK_COMPONENT_LOCAL_NAME(_uk_alloc_head)
+#endif // CONFIG_LIBUKALLOC_COMPONENT_WISE
+
 extern struct uk_alloc *_uk_alloc_head;
 
 /* Iterate over all registered allocators */
@@ -134,6 +142,11 @@ struct uk_alloc *uk_alloc_get_default(void);
 #else /* !CONFIG_LIBUKALLOC_IFSTATS_PERLIB */
 static inline struct uk_alloc *uk_alloc_get_default(void)
 {
+#if CONFIG_LIBUKALLOC_LAZY_DEFAULT_INIT
+	if (!_uk_alloc_head) {
+		return uk_allocator_init();
+	}
+#endif
 	return _uk_alloc_head;
 }
 #endif /* !CONFIG_LIBUKALLOC_IFSTATS_PERLIB */
