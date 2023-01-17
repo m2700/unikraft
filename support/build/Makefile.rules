@@ -1025,7 +1025,12 @@ endef
 define buildrule_libobj_multitarget =
 $(if $(wordlist 2,$(words $(subst |, ,$(2))),$(subst |, ,$(2))),\
  $(foreach V,$(wordlist 2,$(words $(subst |, ,$(2))),$(subst |, ,$(2))),\
-  $(eval $(call buildrule_libobj_preproc,$(1),$(word 1,$(subst |, ,$(2))),$(V)))\
+  $(if $(findstring :c,$(V)),\
+   $(foreach C,$(UK_ALLPLAT_COMPONENTS),\
+    $(eval $(call buildrule_libobj_preproc,$(1),$(word 1,$(subst |, ,$(2))),$(subst :c,$(C))))\
+   ),\
+   $(eval $(call buildrule_libobj_preproc,$(1),$(word 1,$(subst |, ,$(2))),$(V)))\
+  )
  ),\
  $(eval $(call buildrule_libobj_preproc,$(1),$(2),))\
 )
