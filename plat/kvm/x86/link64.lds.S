@@ -49,11 +49,15 @@ SECTIONS
 
 	EXCEPTION_SECTIONS
 
+	__uk_tabs_start = ALIGN(__PAGE_SIZE);
+	. = ALIGN(__PAGE_SIZE);
 	CTORTAB_SECTION
 
 	INITTAB_SECTION
 
 	EVENTTAB_SECTION
+	. = ALIGN(__PAGE_SIZE);
+	__uk_tabs_end = .;
 
 	/* Read-only data */
 	. = ALIGN(__PAGE_SIZE);
