@@ -2,6 +2,7 @@
 
 #include <uk/config.h>
 #include <uk/essentials.h>
+#include <uk/component-local.h>
 
 #ifndef __LIBNAME__
 #error "__LIBNAME__ not defined"
@@ -18,7 +19,12 @@
 #define UK_LIB_COMPONENT(lib) __UK_LIB_COMPONENT(lib)
 #define UK_LIB_SHARE(lib) __UK_LIB_SHARE(lib)
 
+#ifdef __USE_VARIANT_COMPONENT__
+#define UK_COMPONENT __VARIANT__
+#else // __USE_VARIANT_COMPONENT__
 #define UK_COMPONENT UK_LIB_COMPONENT(__LIBNAME__)
+#endif // __USE_VARIANT_COMPONENT__
+
 #define UK_SHARE UK_LIB_SHARE(__LIBNAME__)
 
 #ifdef CONFIG_COMPONENT_SPLITTING
