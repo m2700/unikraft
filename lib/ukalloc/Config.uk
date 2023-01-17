@@ -40,4 +40,17 @@ if LIBUKALLOC
 			Please note that memory usage numbers can be negative:
 			This can be a result of a library A allocating memory
 			and another library B freeing it.
+
+	config LIBUKALLOC_COMPONENT_WISE
+		bool "Per-component allocator"
+		default n
+		depends on COMPONENT_SPLITTING
+		help
+			Private Allocator for every component.
+			This means, every library can register their default allocator manually.
+
+	config LIBUKALLOC_LAZY_DEFAULT_INIT
+		bool "Lazily initializes allocator"
+		help
+			Expects symbol uk_allocator_init, defined in <uk/alloc.h>
 endif

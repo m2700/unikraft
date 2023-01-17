@@ -40,11 +40,13 @@
 #include <uk/assert.h>
 #include <uk/arch/limits.h>
 #include <uk/arch/lcpu.h>
+#include <uk/component.h>
 
 #define size_to_num_pages(size) \
 	(ALIGN_UP((unsigned long)(size), __PAGE_SIZE) / __PAGE_SIZE)
 #define page_off(x) ((unsigned long)(x) & (__PAGE_SIZE - 1))
 
+UK_COMP_CLOCAL_SECTION(".", "bss")
 struct uk_alloc *_uk_alloc_head;
 
 int uk_alloc_register(struct uk_alloc *a)

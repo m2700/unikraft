@@ -45,6 +45,10 @@
 extern "C" {
 #endif
 
+#if CONFIG_LIBUKALLOC_COMPONENT_WISE
+#define uk_alloc_register UK_COMPONENT_LOCAL_NAME(uk_alloc_register)
+#endif // CONFIG_LIBUKALLOC_COMPONENT_WISE
+
 int uk_alloc_register(struct uk_alloc *a);
 
 /**
