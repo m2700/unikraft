@@ -1111,7 +1111,7 @@ $(call libname2bclib,$(1)): $($(call vprefix_lib,$(1),BC_OBJS)) \
 		        -o $(call libname2bclib,$(1)))
 
 $(eval $(call vprefix_lib,$(1),OBJCFLAGS-$(CONFIG_VMFUNC0_TRAMPOLINES)) += \
-	-w -W __component_local_* -G __component_local_*)
+	-w -W '__component_local_*' -G '__component_local_*')
 
 $(eval $(call vprefix_lib,$(1),LOCALS-$(CONFIG_VMFUNC0_TRAMPOLINES)) += $(call libname2trsyms,$(1)))
 $(eval $(call vprefix_lib,$(1),REDEFS-$(CONFIG_VMFUNC0_TRAMPOLINES)) += $(call libname2redeftrs,$(1)))
