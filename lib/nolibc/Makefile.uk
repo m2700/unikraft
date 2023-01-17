@@ -43,4 +43,4 @@ EACHOLIB_SRCS-$(call and_yn,$(CONFIG_LIBNOLIBC),$(CONFIG_VMFUNC0_TRAMPOLINES)) +
 	$(LIBNOLIBC_BASE)/trampolines.c|libnolibc
 
 # Localize internal symbols (starting with __*)
-LIBNOLIBC_OBJCFLAGS-y += -w -L __*
+LIBNOLIBC_OBJCFLAGS-y += -w -L '__*'
