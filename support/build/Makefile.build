@@ -63,6 +63,7 @@ $(eval $(call uc,$(P))_OLIBS-y    += $(call libname2olib,$(L))); \
 $(eval $(call uc,$(P))_BC_OLIBS-y += $(call libname2bclib,$(L))); \
 $(eval $(call uc,$(P))_COMPONENTS += $(call lib_components,$(L))); \
 $(eval $(call add_component_share,__$(L)_SHARE__,$(L))) \
+$(eval $(call add_component_share_array,__$(L)_SHARE_ARRAY__,$(L))) \
 $(eval $(call global_define_s,__$(L)_COMPONENT__,$(call lib_components,$(L)),$(CONFIG_COMPONENT_SPLITTING))) \
 , \
 $(call verbose_info,Warning: '$(L)' has no sources or object files$(comma) ignoring...) \
@@ -98,6 +99,14 @@ $(eval $(call uc,$(P))_UK_COMPONENTS := \
 )
 endif
 
+ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+UK_ALLPLAT_COMPONENTS := $(call sort_num,$(strip \
+	$(if $(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),\
+		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),$(call uc,$(P))_UK_COMPONENTS)) \
+	$(UK_COMPONENTS) \
+))
+endif
+
 #################################################
 #
 # Install Global Component Shares
@@ -107,13 +116,17 @@ endif
 ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
 $(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
 $(eval \
-	$(call global_define_s,__SHARE_$(call uc,$(P))__,$(subst $(space),_,$($(call uc,$(P))_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
+$(call global_define_s,__$(call uc,$(P))_SHARE__,$(subst $(space),_,$($(call uc,$(P))_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
+); \
+$(eval \
+$(call global_define_s,__$(call uc,$(P))_SHARE_ARRAY__,$(subst $(space),$(comma),$($(call uc,$(P))_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
 ); \
 )
 endif
 
 ifneq ($(call qstrip,$(UK_LIBS) $(UK_LIBS-y)),)
-$(eval $(call global_define_s,__SHARE_UK__,$(subst $(space),_,$(UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)))
+$(eval $(call global_define_s,__UK_SHARE__,$(subst $(space),_,$(UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)))
+$(eval $(call global_define_s,__UK_SHARE_ARRAY__,$(subst $(space),$(comma),$(UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)))
 endif
 
 ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
@@ -121,7 +134,10 @@ $(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
 $(eval $(call uc,$(P))_UK_COMPONENTS := \
 	$(call sort_num,$($(call uc,$(P))_COMPONENTS) $(UK_COMPONENTS))); \
 $(eval \
-	$(call global_define_s,__SHARE_$(call uc,$(P))_UK__,$(subst $(space),_,$($(call uc,$(P))_UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
+$(call global_define_s,__$(call uc,$(P))_UK_SHARE__,$(subst $(space),_,$($(call uc,$(P))_UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
+); \
+$(eval \
+$(call global_define_s,__$(call uc,$(P))_UK_SHARE_ARRAY__,$(subst $(space),$(comma),$($(call uc,$(P))_UK_COMPONENTS)),$(CONFIG_COMPONENT_SPLITTING)) \
 ); \
 )
 endif
