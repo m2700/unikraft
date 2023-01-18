@@ -27,6 +27,21 @@
 
 #define UK_SHARE UK_LIB_SHARE(__LIBNAME__)
 
+#ifdef __ASSEMBLY__
+
+#ifdef CONFIG_COMPONENT_SPLITTING
+#define UK_COMP_PREFIX_SECTION(prefix, dot, section) .prefix.section
+#else // CONFIG_COMPONENT_SPLITTING
+#define UK_COMP_PREFIX_SECTION(prefix, dot, section) dot ## section
+#endif // CONFIG_COMPONENT_SPLITTING
+
+#define UK_COMP_PUBLIC_SECTION(dot, section)                                   \
+	UK_COMP_PREFIX_SECTION(shared, dot, section)
+#define UK_COMP_SECTION(comp, dot, section)                                    \
+	UK_COMP_PREFIX_SECTION(UK_CONCAT(component, comp), dot, section)
+
+#else // __ASSEMBLY__
+
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define UK_COMP_PREFIX_SECTION(prefix, dot, section)                           \
 	__section("." prefix "." section)
@@ -38,5 +53,8 @@
 	UK_COMP_PREFIX_SECTION("shared", dot, section)
 #define UK_COMP_SECTION(comp, dot, section)                                    \
 	UK_COMP_PREFIX_SECTION("component" STRINGIFY(comp), dot, section)
+
+#endif // __ASSEMBLY__
+
 #define UK_COMP_LIB_SECTION(lib, dot, section)                                 \
 	UK_COMP_SECTION(UK_SHARE(lib), dot, section)
