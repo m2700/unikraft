@@ -1088,12 +1088,11 @@ $(call libname2olib,$(1)): $(call libname2preolib,$(1)) \
 			   $$(addprefix --localize-symbols=,$$(EACHOLIB_LOCALS) $$(EACHOLIB_LOCALS-y)) \
 			   $$(addprefix --redefine-syms=,$$($(call vprefix_lib,$(1),REDEFS)) $$($(call vprefix_lib,$(1),REDEFS-y))) \
 			   $$(addprefix --redefine-syms=,$$(EACHOLIB_REDEFS) $$(EACHOLIB_REDEFS-y)) \
-			   $(if $(filter y,$(CONFIG_COMPONENT_SPLITTING)),-w -W '__component_local_*') \
-		           $$(OBJCFLAGS) $$(OBJCFLAGS-y) \
-		           $$($(call vprefix_lib,$(1),OBJCFLAGS)) $$($(call vprefix_lib,$(1),OBJCFLAGS-y)) \
 			   $(call libname2preolib,$(1)) $(call libname2olib,$(1)); \
 		$(if $(filter y,$(CONFIG_COMPONENT_SPLITTING)),\
-			$(OBJCOPY) -w --globalize-symbol='__component$$(call lib_main_component,$(1))_*' $(call libname2olib,$(1))))
+			$(OBJCOPY) -w -W '__component$$(call lib_main_component,$(1))_*' \
+					--globalize-symbol='__component$$(call lib_main_component,$(1))_*' \
+					$(call libname2olib,$(1))))
 
 $(call libname2bclib,$(1)): $($(call vprefix_lib,$(1),BC_OBJS)) \
 			      $($(call vprefix_lib,$(1),BC_OBJS-y)) \
