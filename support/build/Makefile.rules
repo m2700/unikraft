@@ -174,12 +174,12 @@ endef
 
 # add_component_share $sharename,$libnames
 define add_component_share =
-$(call global_define_s,$(1),component$(call component_share_id,$(2)),$(CONFIG_COMPONENT_SPLITTING))
+$(call global_define_s,$(1),$(call component_share_id,$(2)),$(CONFIG_COMPONENT_SPLITTING))
 endef
 
 # add_component_share_array $sharename,$libnames
 define add_component_share_array =
-$(call global_define_s,$(1),component$(call component_share_array,$(2)),$(CONFIG_COMPONENT_SPLITTING))
+$(call global_define_s,$(1),$(call component_share_array,$(2)),$(CONFIG_COMPONENT_SPLITTING))
 endef
 
 # add_lib_component_share $owner-libname,$sharename,$share-libnames
