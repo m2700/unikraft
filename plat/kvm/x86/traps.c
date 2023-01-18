@@ -32,6 +32,7 @@
 #include <uk/plat/config.h>
 #include <x86/desc.h>
 #include <kvm-x86/traps.h>
+#include <uk/component.h>
 
 /*
  * CPUs should get dedicated IRQ and exception stacks. We use the interrupt
@@ -137,6 +138,7 @@ DECLARE_TRAP_EC(nmi,           "NMI",                  NULL)
 DECLARE_TRAP_EC(double_fault,  "double fault",         NULL)
 DECLARE_TRAP_EC(virt_error,    "virtualization error", NULL)
 
+UK_COMP_PUBLIC_SECTION(".", "bss")
 static struct seg_gate_desc64 cpu_idt[IDT_NUM_ENTRIES] __align(8);
 static struct desc_table_ptr64 idtptr;
 
