@@ -62,10 +62,10 @@ char cpu_intr_stack[CONFIG_UKPLAT_LCPU_MAXCOUNT][STACK_SIZE];
 __section(".intrstack") __align(STACK_SIZE) /* IST2 */
 char cpu_trap_stack[CONFIG_UKPLAT_LCPU_MAXCOUNT][STACK_SIZE];
 
-static __align(8)
+static __align(8) UK_COMP_PUBLIC_SECTION(".", "bss")
 struct tss64 cpu_tss[CONFIG_UKPLAT_LCPU_MAXCOUNT];
 
-static __align(8)
+static __align(8) UK_COMP_PUBLIC_SECTION(".", "bss")
 struct seg_desc32 cpu_gdt64[CONFIG_UKPLAT_LCPU_MAXCOUNT][GDT_NUM_ENTRIES];
 
 static void gdt_init(__lcpuidx idx)

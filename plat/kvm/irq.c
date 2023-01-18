@@ -36,6 +36,7 @@
 #include <uk/print.h>
 #include <errno.h>
 #include <uk/bitops.h>
+#include <uk/component.h>
 
 /* IRQ handlers declarations */
 struct irq_handler {
@@ -43,6 +44,7 @@ struct irq_handler {
 	void *arg;
 };
 
+UK_COMP_PUBLIC_SECTION(".", "bss")
 static struct irq_handler irq_handlers[__MAX_IRQ]
 				[CONFIG_KVM_MAX_IRQ_HANDLER_ENTRIES];
 
@@ -86,6 +88,7 @@ int ukplat_irq_register(unsigned long irq, irq_handler_func_t func, void *arg)
  */
 extern unsigned long sched_have_pending_events;
 
+UK_COMP_PUBLIC_SECTION(".", "text") // irq handler
 void _ukplat_irq_handle(unsigned long irq)
 {
 	struct irq_handler *h;
