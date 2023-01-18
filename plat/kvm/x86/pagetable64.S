@@ -34,6 +34,7 @@
 #include <uk/config.h>
 #include <uk/arch/paging.h>
 #include <uk/config.h>
+#include <uk/component.h>
 
 #define PTE_RO		X86_PTE_PRESENT
 #define PTE_RW		(X86_PTE_PRESENT | X86_PTE_RW)
@@ -119,11 +120,7 @@
 	pte_fill \paddr, \pages, PT_LVL, \pte
 .endm
 
-#ifdef CONFIG_COMPONENT_SPLITTING
-.section .shared.text
-#else
-.section .text
-#endif /* CONFIG_COMPONENT_SPLITTING */
+.section UK_COMP_PUBLIC_SECTION(., text)
 
 /* x86-64 Boot Page Table
  *

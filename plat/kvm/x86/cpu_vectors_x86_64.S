@@ -25,6 +25,7 @@
 /* Taken from solo5 */
 
 #include <x86/traps.h>
+#include <uk/component.h>
 
 #define ENTRY(X)     .global X ; .type X, @function ; X:
 
@@ -63,6 +64,8 @@
 	popq %rsi
 	popq %rdi
 .endm
+
+.section UK_COMP_PUBLIC_SECTION(., text)
 
 .macro TRAP_ENTRY trapname, has_ec
 ENTRY(ASM_TRAP_SYM(\trapname))
