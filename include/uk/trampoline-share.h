@@ -18,12 +18,10 @@
 // no shares defined without component splitting
 #elif UK_SRC_COMPONENT < UK_COMPONENT
 #define UK_TRAMPOLINE_SHARE                                                    \
-	UK_CONCAT(UK_CONCAT(component, UK_SRC_COMPONENT),                      \
-		  UK_CONCAT(_, UK_COMPONENT))
+	UK_CONCAT(UK_CONCAT(UK_SRC_COMPONENT, _), UK_COMPONENT)
 #elif UK_SRC_COMPONENT > UK_COMPONENT
 #define UK_TRAMPOLINE_SHARE                                                    \
-	UK_CONCAT(UK_CONCAT(component, UK_COMPONENT),                          \
-		  UK_CONCAT(_, UK_SRC_COMPONENT))
+	UK_CONCAT(UK_CONCAT(UK_COMPONENT, _), UK_SRC_COMPONENT)
 #else
-#define UK_TRAMPOLINE_SHARE UK_CONCAT(component, UK_COMPONENT)
+#define UK_TRAMPOLINE_SHARE UK_COMPONENT
 #endif
