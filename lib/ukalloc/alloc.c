@@ -46,7 +46,9 @@
 	(ALIGN_UP((unsigned long)(size), __PAGE_SIZE) / __PAGE_SIZE)
 #define page_off(x) ((unsigned long)(x) & (__PAGE_SIZE - 1))
 
+#if CONFIG_LIBUKALLOC_COMPONENT_WISE
 UK_COMP_CLOCAL_SECTION(".", "bss")
+#endif
 struct uk_alloc *_uk_alloc_head;
 
 int uk_alloc_register(struct uk_alloc *a)
