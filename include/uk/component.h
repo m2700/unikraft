@@ -10,13 +10,16 @@
 
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define __UK_LIB_COMPONENT(lib) __##lib##_COMPONENT__
+#define __UK_LIB_IS_SHARED(lib) __##lib##_IS_SHARED__
 #define __UK_LIB_SHARE(lib) __##lib##_SHARE__
 #else // CONFIG_COMPONENT_SPLITTING
 #define __UK_LIB_COMPONENT(lib) 0
+#define __UK_LIB_IS_SHARED(lib) 0
 #define __UK_LIB_SHARE(lib) 0
 #endif // CONFIG_COMPONENT_SPLITTING
 
 #define UK_LIB_COMPONENT(lib) __UK_LIB_COMPONENT(lib)
+#define UK_LIB_IS_SHARED(lib) __UK_LIB_IS_SHARED(lib)
 #define UK_LIB_SHARE(lib) __UK_LIB_SHARE(lib)
 
 #ifdef __USE_VARIANT_COMPONENT__
@@ -25,6 +28,7 @@
 #define UK_COMPONENT UK_LIB_COMPONENT(__LIBNAME__)
 #endif // __USE_VARIANT_COMPONENT__
 
+#define UK_IS_SHARED UK_LIB_IS_SHARED(__LIBNAME__)
 #define UK_SHARE UK_LIB_SHARE(__LIBNAME__)
 
 #ifdef __ASSEMBLY__
@@ -32,7 +36,7 @@
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define UK_COMP_PREFIX_SECTION(prefix, dot, section) .prefix.section
 #else // CONFIG_COMPONENT_SPLITTING
-#define UK_COMP_PREFIX_SECTION(prefix, dot, section) dot ## section
+#define UK_COMP_PREFIX_SECTION(prefix, dot, section) dot##section
 #endif // CONFIG_COMPONENT_SPLITTING
 
 #define UK_COMP_PUBLIC_SECTION(dot, section)                                   \
