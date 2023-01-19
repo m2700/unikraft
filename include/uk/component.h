@@ -37,6 +37,8 @@
 
 #define UK_COMP_PUBLIC_SECTION(dot, section)                                   \
 	UK_COMP_PREFIX_SECTION(shared, dot, section)
+#define UK_COMP_CLOCAL_SECTION(dot, section)                                   \
+	UK_COMP_PREFIX_SECTION(clocal, dot, section)
 #define UK_COMP_SECTION(comp, dot, section)                                    \
 	UK_COMP_PREFIX_SECTION(UK_CONCAT(component, comp), dot, section)
 
@@ -51,6 +53,8 @@
 
 #define UK_COMP_PUBLIC_SECTION(dot, section)                                   \
 	UK_COMP_PREFIX_SECTION("shared", dot, section)
+#define UK_COMP_CLOCAL_SECTION(dot, section)                                   \
+	UK_COMP_PREFIX_SECTION("clocal", dot, section)
 #define UK_COMP_SECTION(comp, dot, section)                                    \
 	UK_COMP_PREFIX_SECTION("component" STRINGIFY(comp), dot, section)
 
