@@ -36,14 +36,34 @@
 
 #ifdef CONFIG_COMPONENT_SPLITTING
 #include <uk/kvm/components.lds.h>
-#else
+#define COMPONENT_LOCAL_SECTIONS                                      \
+	__clocal_data_start = ALIGN(__PAGE_SIZE);                          \
+	. = ALIGN(__PAGE_SIZE);                                             \
+	.clocal.data : {                                                     \
+		*(.clocal.data)                                                   \
+		*(.clocal.data.*)                                                  \
+	}                                                                       \
+	. = ALIGN(__PAGE_SIZE);                                                  \
+	. = __clocal_data_start + (. - __clocal_data_start) * UK_COMPONENT_COUNT; \
+	__clocal_data_end = .;                                                     \
+	__clocal_bss_start = ALIGN(__PAGE_SIZE);                                    \
+	. = ALIGN(__PAGE_SIZE);                                                      \
+	.clocal.bss : {                                                               \
+		*(.clocal.bss)                                                             \
+		*(.clocal.bss.*)                                                            \
+	}                                                                                \
+	. = ALIGN(__PAGE_SIZE);                                                           \
+	. = __clocal_bss_start + (. - __clocal_bss_start) * UK_COMPONENT_COUNT;            \
+	__clocal_bss_end = .;
+#else // CONFIG_COMPONENT_SPLITTING
 #define COMPONENT_TEXT_SECTIONS
 #define COMPONENT_RODATA_SECTIONS
 #define COMPONENT_TDATA_SECTIONS
 #define COMPONENT_TBSS_SECTIONS
 #define COMPONENT_DATA_SECTIONS
 #define COMPONENT_BSS_SECTIONS
-#endif
+#define COMPONENT_LOCAL_SECTIONS
+#endif // CONFIG_COMPONENT_SPLITTING
 
 /* DWARF debug sections.  Symbols in the DWARF debugging sections are
  * relative to the beginning of the section so we begin them at 0.
@@ -149,6 +169,7 @@
 	. = ADDR(.tbss);
 
 #define DATA_SECTIONS							\
+	COMPONENT_LOCAL_SECTIONS					\
 	/* Read-write data (initialized) */				\
 	. = ALIGN(__PAGE_SIZE);						\
 	_data = .;							\
