@@ -125,10 +125,6 @@ struct uk_alloc {
 	__u8 priv[];
 };
 
-#if CONFIG_LIBUKALLOC_COMPONENT_WISE
-#define _uk_alloc_head UK_COMPONENT_LOCAL_NAME(_uk_alloc_head)
-#endif // CONFIG_LIBUKALLOC_COMPONENT_WISE
-
 extern struct uk_alloc *_uk_alloc_head;
 
 /* Iterate over all registered allocators */
