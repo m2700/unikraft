@@ -87,7 +87,6 @@ void intctrl_init(void)
 	PIC_remap(32, 40);
 }
 
-UK_COMP_PUBLIC_SECTION(".", "text") // for irq handler
 void intctrl_ack_irq(unsigned int irq)
 {
 	if (!IRQ_ON_MASTER(irq))

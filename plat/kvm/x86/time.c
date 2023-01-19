@@ -93,7 +93,6 @@ void ukplat_time_fini(void)
 {
 }
 
-UK_COMP_PUBLIC_SECTION(".", "text") // for irq handler
 uint32_t ukplat_time_get_irq(void)
 {
 	return 0;
