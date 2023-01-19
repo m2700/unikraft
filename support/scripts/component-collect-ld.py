@@ -195,6 +195,8 @@ def generic_linker_defs(opt: argparse.Namespace) -> str:
     header_s = f"""\
 #pragma once
 
+#define UK_COMPONENT_COUNT {opt.comp_num}
+
 #define COMPONENT_TEXT_SECTIONS \\
     {text_comp_sects}
 
