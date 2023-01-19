@@ -36,24 +36,17 @@
 
 #ifdef CONFIG_COMPONENT_SPLITTING
 #include <uk/kvm/components.lds.h>
-#define COMPONENT_LOCAL_SECTIONS                                      \
-	__clocal_data_start = ALIGN(__PAGE_SIZE);                          \
-	. = ALIGN(__PAGE_SIZE);                                             \
-	.clocal.data : {                                                     \
-		*(.clocal.data)                                                   \
-		*(.clocal.data.*)                                                  \
-	}                                                                       \
-	. = ALIGN(__PAGE_SIZE);                                                  \
-	. = __clocal_data_start + (. - __clocal_data_start) * UK_COMPONENT_COUNT; \
-	__clocal_data_end = .;                                                     \
-	__clocal_bss_start = ALIGN(__PAGE_SIZE);                                    \
-	. = ALIGN(__PAGE_SIZE);                                                      \
-	.clocal.bss : {                                                               \
-		*(.clocal.bss)                                                             \
-		*(.clocal.bss.*)                                                            \
-	}                                                                                \
-	. = ALIGN(__PAGE_SIZE);                                                           \
-	. = __clocal_bss_start + (. - __clocal_bss_start) * UK_COMPONENT_COUNT;            \
+#define COMPONENT_LOCAL_DATA_SECTION \
+	__clocal_data_start = ALIGN(__PAGE_SIZE); \
+	. = ALIGN(__PAGE_SIZE); \
+	.clocal.data : {*(.clocal.data)} \
+	. = __clocal_data_start + (ALIGN(__PAGE_SIZE) - __clocal_data_start) * UK_COMPONENT_COUNT; \
+	__clocal_data_end = .;
+#define COMPONENT_LOCAL_BSS_SECTIONS \
+	__clocal_bss_start = ALIGN(__PAGE_SIZE); \
+	. = ALIGN(__PAGE_SIZE); \
+	.clocal.bss : {*(.clocal.bss)} \
+	. = __clocal_bss_start + (ALIGN(__PAGE_SIZE) - __clocal_bss_start) * UK_COMPONENT_COUNT; \
 	__clocal_bss_end = .;
 #else // CONFIG_COMPONENT_SPLITTING
 #define COMPONENT_TEXT_SECTIONS
@@ -62,7 +55,8 @@
 #define COMPONENT_TBSS_SECTIONS
 #define COMPONENT_DATA_SECTIONS
 #define COMPONENT_BSS_SECTIONS
-#define COMPONENT_LOCAL_SECTIONS
+#define COMPONENT_LOCAL_DATA_SECTION
+#define COMPONENT_LOCAL_BSS_SECTIONS
 #endif // CONFIG_COMPONENT_SPLITTING
 
 /* DWARF debug sections.  Symbols in the DWARF debugging sections are
@@ -169,7 +163,6 @@
 	. = ADDR(.tbss);
 
 #define DATA_SECTIONS							\
-	COMPONENT_LOCAL_SECTIONS					\
 	/* Read-write data (initialized) */				\
 	. = ALIGN(__PAGE_SIZE);						\
 	_data = .;							\
@@ -179,6 +172,7 @@
 		*(.data.*)						\
 	}								\
 	COMPONENT_DATA_SECTIONS				\
+	COMPONENT_LOCAL_DATA_SECTION		\
 	_edata = .;							\
 									\
 	/*								\
@@ -196,6 +190,7 @@
 		*(COMMON)						\
 	}										\
 	. = ALIGN(__PAGE_SIZE);			\
-	COMPONENT_BSS_SECTIONS
+	COMPONENT_BSS_SECTIONS			\
+	COMPONENT_LOCAL_BSS_SECTIONS
 
 #endif /* __UK_COMMON_LDS_H */
