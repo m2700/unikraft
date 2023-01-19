@@ -97,7 +97,7 @@ UK_COMP_PUBLIC_SECTION(".", "text") // irq handler
 void _ukplat_irq_handle(unsigned long irq)
 {
 	#if CONFIG_VMFUNC0_TRAMPOLINES
-	DYN_TRAMPOLINE_INIT
+	DYN_TRAMPOLINE_INIT;
 	#endif
 
 	struct irq_handler *h;
@@ -137,7 +137,7 @@ exit_ack:
 	intctrl_ack_irq(irq);
 
 	#if CONFIG_VMFUNC0_TRAMPOLINES
-	DYN_TRAMPOLINE_FINI
+	DYN_TRAMPOLINE_FINI;
 	#endif
 }
 
