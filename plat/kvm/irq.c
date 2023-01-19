@@ -96,7 +96,7 @@ extern unsigned long sched_have_pending_events;
 UK_COMP_PUBLIC_SECTION(".", "text") // irq handler
 void _ukplat_irq_handle(unsigned long irq)
 {
-	#if VMFUNC0_TRAMPOLINES
+	#if CONFIG_VMFUNC0_TRAMPOLINES
 	DYN_TRAMPOLINE_INIT
 	#endif
 
@@ -136,7 +136,7 @@ void _ukplat_irq_handle(unsigned long irq)
 exit_ack:
 	intctrl_ack_irq(irq);
 
-	#if VMFUNC0_TRAMPOLINES
+	#if CONFIG_VMFUNC0_TRAMPOLINES
 	DYN_TRAMPOLINE_FINI
 	#endif
 }
