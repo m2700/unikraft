@@ -40,6 +40,7 @@
 #include <uk/assert.h>
 #include <uk/arch/limits.h>
 #include <uk/arch/lcpu.h>
+#include <uk/component.h>
 
 #if CONFIG_HAVE_MEMTAG
 #include <uk/arch/memtag.h>
@@ -48,6 +49,26 @@
 #define size_to_num_pages(size) \
 	(ALIGN_UP((unsigned long)(size), __PAGE_SIZE) / __PAGE_SIZE)
 #define page_off(x) ((unsigned long)(x) & (__PAGE_SIZE - 1))
+
+UK_COMP_CLOCAL_SECTION(".", "bss")
+struct uk_alloc *_uk_alloc_head;
+
+int uk_alloc_register(struct uk_alloc *a)
+{
+	struct uk_alloc *this = _uk_alloc_head;
+
+	if (!_uk_alloc_head) {
+		_uk_alloc_head = a;
+		a->next = __NULL;
+		return 0;
+	}
+
+	while (this && this->next)
+		this = this->next;
+	this->next = a;
+	a->next = __NULL;
+	return 0;
+}
 
 #ifdef CONFIG_HAVE_MEMTAG
 #define __align_metadata_ifpages __align(MEMTAG_GRANULE)
