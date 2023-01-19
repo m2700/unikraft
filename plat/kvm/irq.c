@@ -39,7 +39,7 @@
 #include <uk/component.h>
 #include <uk/config.h>
 
-#if VMFUNC0_TRAMPOLINES
+#if CONFIG_VMFUNC0_TRAMPOLINES
 #include <uk/trampoline.h>
 #endif
 
