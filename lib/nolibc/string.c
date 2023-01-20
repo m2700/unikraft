@@ -61,7 +61,9 @@
 #include <limits.h>
 #include <errno.h>
 #include <stdio.h>
+#include <uk/component.h>
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 void *memcpy(void *dst, const void *src, size_t len)
 {
 	size_t p;
@@ -72,6 +74,7 @@ void *memcpy(void *dst, const void *src, size_t len)
 	return dst;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 void *memset(void *ptr, int val, size_t len)
 {
 	__u8 *p = (__u8 *) ptr;
@@ -82,6 +85,7 @@ void *memset(void *ptr, int val, size_t len)
 	return ptr;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 void *memchr(const void *ptr, int val, size_t len)
 {
 	uintptr_t o = 0;
@@ -93,6 +97,7 @@ void *memchr(const void *ptr, int val, size_t len)
 	return NULL; /* did not find val */
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 void *memrchr(const void *m, int c, size_t n)
 {
 	const unsigned char *s = m;
@@ -104,6 +109,7 @@ void *memrchr(const void *m, int c, size_t n)
 	return 0;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 void *memmove(void *dst, const void *src, size_t len)
 {
 	uint8_t *d = dst;
@@ -123,6 +129,7 @@ void *memmove(void *dst, const void *src, size_t len)
 	return dst;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 int memcmp(const void *ptr1, const void *ptr2, size_t len)
 {
 	const unsigned char *c1 = (const unsigned char *)ptr1;
@@ -136,17 +143,20 @@ int memcmp(const void *ptr1, const void *ptr2, size_t len)
 	return 0;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 size_t strlen(const char *str)
 {
 	return strnlen(str, SIZE_MAX);
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 size_t strnlen(const char *str, size_t len)
 {
 	const char *p = memchr(str, 0, len);
 	return p ? (size_t) (p - str) : len;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strncpy(char *dst, const char *src, size_t len)
 {
 	size_t clen;
@@ -162,11 +172,13 @@ char *strncpy(char *dst, const char *src, size_t len)
 	return dst;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strcpy(char *dst, const char *src)
 {
 	return strncpy(dst, src, SIZE_MAX);
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 int strncmp(const char *str1, const char *str2, size_t len)
 {
 	const char *c1 = (const char *)str1;
@@ -181,6 +193,7 @@ int strncmp(const char *str1, const char *str2, size_t len)
 	return 0;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 int strcmp(const char *str1, const char *str2)
 {
 	register signed char __res;
@@ -200,6 +213,7 @@ int strcmp(const char *str1, const char *str2)
 		((a)[(size_t)(b) / (8*sizeof *(a))] op \
 		(size_t)1 << ((size_t)(b) % (8 * sizeof *(a))))
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strchrnul(const char *s, int c)
 {
 	size_t *w, k;
@@ -219,17 +233,20 @@ char *strchrnul(const char *s, int c)
 	return (char *)s;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strchr(const char *str, int c)
 {
 	char *r = strchrnul(str, c);
 	return *(unsigned char *)r == (unsigned char)c ? r : 0;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strrchr(const char *s, int c)
 {
 	return memrchr(s, c, strlen(s) + 1);
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 size_t strcspn(const char *s, const char *c)
 {
 	const char *a = s;
@@ -246,6 +263,7 @@ size_t strcspn(const char *s, const char *c)
 	return s-a;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 size_t strspn(const char *s, const char *c)
 {
 	const char *a = s;
@@ -266,6 +284,7 @@ size_t strspn(const char *s, const char *c)
 	return s-a;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strtok(char *restrict s, const char *restrict sep)
 {
 	static char *p;
@@ -283,6 +302,7 @@ char *strtok(char *restrict s, const char *restrict sep)
 	return s;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strtok_r(char *restrict s, const char *restrict sep, char **restrict p)
 {
 	if (!s && !(s = *p))
@@ -322,6 +342,7 @@ char *strdup(const char *str)
 /* strlcpy has different ALIGN */
 #undef ALIGN
 #define ALIGN (sizeof(size_t)-1)
+UK_COMP_PUBLIC_SECTION(".", "text")
 size_t strlcpy(char *d, const char *s, size_t n)
 {
 	char *d0 = d;
@@ -353,6 +374,7 @@ finish:
 	return d-d0 + strlen(s);
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 size_t strlcat(char *d, const char *s, size_t n)
 {
 	size_t l = strnlen(d, n);
@@ -799,6 +821,7 @@ char *strerror(int errnum)
 	return strerror_r(errnum, buf, sizeof(buf));
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 char *strncat(char *dest, const char *src, size_t n)
 {
 	char *a = dest;
@@ -816,6 +839,7 @@ char *strncat(char *dest, const char *src, size_t n)
 	return a;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 int bcmp(const void *s1, const void *s2, size_t count)
 {
 	return memcmp(s1, s2, count);
