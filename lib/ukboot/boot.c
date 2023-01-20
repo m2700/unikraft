@@ -74,22 +74,15 @@
 #endif
 #ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
 #include <uk/ept-isolation.h>
-#include <uk/component.h>
-#include <uk/trampoline.h>
 #endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
 #include "banner.h"
 
-#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
-#define __SRC_LIBNAME__ libukboot_main
-#include <uk/trampoline-share.h>
-#endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
-
-
 int main(int argc, char *argv[]) __weak;
 
-#if defined(CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION)                               \
-    && UK_COMPONENT != UK_SRC_COMPONENT
-STATIC_TRAMPOLINE(main, (int argc, char *argv[]))
+#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
+#define __SRC_LIBNAME__ libukboot_main
+#include <uk/auto-trampoline.h>
+AUTO_STATIC_TRAMPOLINE(main)
 #define main __tr_main
 #endif // CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
 
