@@ -36,6 +36,7 @@ $(eval UK_BC_OLIBS-y += $(call libname2bclib,$(L))); \
 $(eval UK_COMPONENTS += $(call lib_components,$(L))); \
 $(if $(word 2,$(call lib_components,$(L))), \
 	$(eval $(call global_define_s,__$(L)_IS_SHARED__,1,$(CONFIG_COMPONENT_SPLITTING))); \
+	$(eval COMPONENT_SHARES += $(call component_share_id,$(L))); \
 ); \
 $(eval $(call add_component_share,__$(L)_SHARE__,$(L))); \
 $(eval $(call add_component_share_array,__$(L)_SHARE_ARRAY__,$(L))); \
@@ -68,6 +69,7 @@ $(eval $(call uc,$(P))_BC_OLIBS-y += $(call libname2bclib,$(L))); \
 $(eval $(call uc,$(P))_COMPONENTS += $(call lib_components,$(L))); \
 $(if $(word 2,$(call lib_components,$(L))), \
 	$(eval $(call global_define_s,__$(L)_IS_SHARED__,1,$(CONFIG_COMPONENT_SPLITTING))); \
+	$(eval COMPONENT_SHARES += $(call component_share_id,$(L))); \
 ); \
 $(eval $(call add_component_share,__$(L)_SHARE__,$(L))); \
 $(eval $(call add_component_share_array,__$(L)_SHARE_ARRAY__,$(L))); \
@@ -109,7 +111,7 @@ endif
 ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
 UK_ALLPLAT_COMPONENTS := $(call sort_num,$(strip \
 	$(if $(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),\
-		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),$(call uc,$(P))_UK_COMPONENTS)) \
+		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),$(call uc,$(P))_COMPONENTS)) \
 	$(UK_COMPONENTS) \
 ))
 endif
@@ -148,6 +150,18 @@ $(call global_define_s,__$(call uc,$(P))_UK_SHARE_ARRAY__,$(subst $(space),$(com
 ); \
 )
 endif
+
+#################################################
+#
+# Install Global Component Share Combinators
+#
+#################################################
+
+COMPONENT_SHARES := $(sort $(COMPONENT_SHARES))
+$(foreach CS,$(sort $(foreach S,$(COMPONENT_SHARES),$(foreach C,$(UK_ALLPLAT_COMPONENTS),$(S)_$(C)))),\
+$(eval $(call global_define_s,__SHARE_COMBI_$(SC)__,$(strip \
+		$(subst $(space),_,$(call sort_num,$(subst _,$(space),$(SC)))) \
+	),$(CONFIG_COMPONENT_SPLITTING))))
 
 #################################################
 #
