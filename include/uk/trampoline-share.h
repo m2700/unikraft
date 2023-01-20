@@ -1,4 +1,5 @@
 #include <uk/config.h>
+#include <uk/component.h>
 
 #ifndef __SRC_LIBNAME__
 #error "__SRC_LIBNAME__ is not defined"
