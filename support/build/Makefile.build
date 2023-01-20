@@ -111,7 +111,7 @@ endif
 ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
 UK_ALLPLAT_COMPONENTS := $(call sort_num,$(strip \
 	$(if $(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),\
-		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),$(call uc,$(P))_COMPONENTS)) \
+		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),$($(call uc,$(P))_COMPONENTS))) \
 	$(UK_COMPONENTS) \
 ))
 endif
@@ -158,7 +158,7 @@ endif
 #################################################
 
 COMPONENT_SHARES := $(sort $(COMPONENT_SHARES))
-$(foreach CS,$(sort $(foreach S,$(COMPONENT_SHARES),$(foreach C,$(UK_ALLPLAT_COMPONENTS),$(S)_$(C)))),\
+$(foreach SC,$(sort $(foreach S,$(COMPONENT_SHARES),$(foreach C,$(UK_ALLPLAT_COMPONENTS),$(S)_$(C)))),\
 $(eval $(call global_define_s,__SHARE_COMBI_$(SC)__,$(strip \
 		$(subst $(space),_,$(call sort_num,$(subst _,$(space),$(SC)))) \
 	),$(CONFIG_COMPONENT_SPLITTING))))
