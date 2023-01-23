@@ -41,7 +41,6 @@
 	UK_CONCAT(UK_CONCAT(__SHARE_COMBI_, UK_SHARE),                         \
 		  UK_CONCAT(UK_CONCAT(_, UK_SRC_COMPONENT), __))
 #endif
-#define UK_TRAMPOLINE_SHARE
 #elif UK_SRC_COMPONENT < UK_COMPONENT
 #define UK_TRAMPOLINE_SHARE                                                    \
 	UK_CONCAT(UK_CONCAT(UK_SRC_COMPONENT, _), UK_COMPONENT)
