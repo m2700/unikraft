@@ -172,6 +172,11 @@ define component_share_array =
 $(subst $(space),$(comma),$(call sort_num,$(foreach L,$(1),$(call lib_components,$(L)))))
 endef
 
+# component_share_union $share1, $share2
+define component_share_union =
+$(subst $(space),_,$(call sort_num,$(subst _,$(space),$(1)_$(2))))
+endef
+
 # add_component_share $sharename,$libnames
 define add_component_share =
 $(call global_define_s,$(1),$(call component_share_id,$(2)),$(CONFIG_COMPONENT_SPLITTING))
