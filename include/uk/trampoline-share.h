@@ -28,8 +28,8 @@
 #endif
 
 #define UK_SRC_COMPONENT UK_LIB_COMPONENT(__SRC_LIBNAME__)
-#define UK_SRC_IS_SHARED UK_LIB_IS_SHARED(__LIBNAME__)
-#define UK_SRC_SHARE UK_LIB_SHARE(__LIBNAME__)
+#define UK_SRC_IS_SHARED UK_LIB_IS_SHARED(__SRC_LIBNAME__)
+#define UK_SRC_SHARE UK_LIB_SHARE(__SRC_LIBNAME__)
 
 #if !defined(CONFIG_COMPONENT_SPLITTING)
 // no shares defined without component splitting
@@ -53,5 +53,5 @@
 #endif
 
 #define UK_TRAMPOLINE_NEEDED                                                   \
-	!(UK_SRC_IS_SHARED && __SHARE_HAS(UK_SRC_SHARE, UK_SHARE))             \
-	    && (UK_IS_SHARED || UK_COMPONENT != UK_SRC_COMPONENT)
+	(!(UK_SRC_IS_SHARED && __SHARE_HAS(UK_SRC_SHARE, UK_SHARE))            \
+	 && (UK_IS_SHARED || UK_COMPONENT != UK_SRC_COMPONENT))
