@@ -158,10 +158,15 @@ endif
 #################################################
 
 COMPONENT_SHARES := $(sort $(COMPONENT_SHARES))
-$(foreach SC,$(sort $(foreach S,$(COMPONENT_SHARES),$(foreach C,$(UK_ALLPLAT_COMPONENTS),$(S)_$(C)))),\
-$(eval $(call global_define_s,__SHARE_COMBI_$(SC)__,$(strip \
-		$(subst $(space),_,$(call sort_num,$(subst _,$(space),$(SC)))) \
-	),$(CONFIG_COMPONENT_SPLITTING))))
+
+$(foreach S1,$(COMPONENT_SHARES),$(foreach S2,$(sort $(UK_ALLPLAT_COMPONENTS) $(COMPONENT_SHARES)),\
+$(if $(filter $(call component_share_union,$(S1),$(S2)),$(S1)),\
+$(eval $(call global_define_s,__SHARE_$(S1)_HAS_$(S2)__,1,$(CONFIG_COMPONENT_SPLITTING))),\
+$(eval $(call global_define_s,__SHARE_COMBI_$(S1)_$(S2)__,$(strip \
+	$(call component_share_union,$(S1),$(S2)) \
+),$(CONFIG_COMPONENT_SPLITTING))) \
+) \
+))
 
 #################################################
 #

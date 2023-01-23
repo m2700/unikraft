@@ -8,6 +8,10 @@
 #error "__LIBNAME__ not defined"
 #endif
 
+#define __SHARE_HAS(share, cs)                                                 \
+	UK_CONCAT(UK_CONCAT(__SHARE_, share),                                  \
+		  UK_CONCAT(_HAS_, UK_CONCAT(cs, __)))
+
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define __UK_LIB_COMPONENT(lib) __##lib##_COMPONENT__
 #define __UK_LIB_IS_SHARED(lib) __##lib##_IS_SHARED__

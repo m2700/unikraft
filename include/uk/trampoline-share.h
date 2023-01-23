@@ -11,18 +11,37 @@
 #undef UK_SRC_COMPONENT
 #endif
 
+#ifdef UK_SRC_IS_SHARED
+#undef UK_SRC_IS_SHARED
+#endif
+
+#ifdef UK_SRC_SHARE
+#undef UK_SRC_SHARE
+#endif
+
 #ifdef UK_TRAMPOLINE_SHARE
 #undef UK_TRAMPOLINE_SHARE
 #endif
 
+#ifdef UK_TRAMPOLINE_NEEDED
+#undef UK_TRAMPOLINE_NEEDED
+#endif
+
 #define UK_SRC_COMPONENT UK_LIB_COMPONENT(__SRC_LIBNAME__)
+#define UK_SRC_IS_SHARED UK_LIB_IS_SHARED(__LIBNAME__)
+#define UK_SRC_SHARE UK_LIB_SHARE(__LIBNAME__)
 
 #if !defined(CONFIG_COMPONENT_SPLITTING)
 // no shares defined without component splitting
 #elif UK_IS_SHARED
+#if __SHARE_HAS(UK_SHARE, UK_SRC_COMPONENT)
+#define UK_TRAMPOLINE_SHARE UK_SHARE
+#else
 #define UK_TRAMPOLINE_SHARE                                                    \
 	UK_CONCAT(UK_CONCAT(__SHARE_COMBI_, UK_SHARE),                         \
 		  UK_CONCAT(UK_CONCAT(_, UK_SRC_COMPONENT), __))
+#endif
+#define UK_TRAMPOLINE_SHARE
 #elif UK_SRC_COMPONENT < UK_COMPONENT
 #define UK_TRAMPOLINE_SHARE                                                    \
 	UK_CONCAT(UK_CONCAT(UK_SRC_COMPONENT, _), UK_COMPONENT)
@@ -32,3 +51,7 @@
 #else
 #define UK_TRAMPOLINE_SHARE UK_COMPONENT
 #endif
+
+#define UK_TRAMPOLINE_NEEDED                                                   \
+	!(UK_SRC_IS_SHARED && __SHARE_HAS(UK_SRC_SHARE, UK_SHARE))             \
+	    && (UK_IS_SHARED || UK_COMPONENT != UK_SRC_COMPONENT)
