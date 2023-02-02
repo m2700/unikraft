@@ -35,7 +35,7 @@ $(LINUXU_IMAGE).bc: $(LINUXU_BC_OLIBS) $(LINUXU_BC_OLIBS-y) $(UK_BC_OLIBS) $(UK_
 	$(call build_cmd,BCLD,,$(LINUXU_IMAGE).bc,\
 	       $(BCLD) $(LINUXU_BC_OLIBS) $(LINUXU_BC_OLIBS-y) \
 			       $(UK_BC_OLIBS) $(UK_BC_OLIBS-y) \
-			       -o $(LINUXU_IMAGE).bc)
+			       -o $(LINUXU_IMAGE).bc || $(TOUCH) $(LINUXU_IMAGE).bc)
 
 $(LINUXU_IMAGE).sym: $(LINUXU_DEBUG_IMAGE)
 	$(call build_cmd,NM,,$@, $(NM) -n $< > $@)
