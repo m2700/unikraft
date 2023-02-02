@@ -116,6 +116,8 @@ LIBKVMPLAT_SRCS-y              += $(LIBKVMPLAT_BASE)/io.c
 LIBKVMPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/lcpu.c|common
 LIBKVMPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/memory.c|common
 LIBKVMPLAT_SRCS-y              += $(UK_PLAT_KVM_DEF_LDS)
+EACHOLIB_SRCS-$(call and_yn,$(CONFIG_PLAT_KVM),$(CONFIG_VMFUNC0_TRAMPOLINES)) += \
+	$(LIBKVMPLAT_BASE)/trampolines.c|libkvmplat
 
 ##
 ## PCI library definitions
