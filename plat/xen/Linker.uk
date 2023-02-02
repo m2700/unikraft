@@ -51,7 +51,7 @@ $(XEN_IMAGE).bc: $(XEN_BC_OLIBS) $(XEN_BC_OLIBS-y) $(UK_BC_OLIBS) $(UK_BC_OLIBS-
 	$(call build_cmd,BCLD,,$(XEN_IMAGE).bc,\
 	       $(BCLD) $(XEN_BC_OLIBS) $(XEN_BC_OLIBS-y) \
 			       $(UK_BC_OLIBS) $(UK_BC_OLIBS-y) \
-			       -o $(XEN_IMAGE).bc)
+			       -o $(XEN_IMAGE).bc || $(TOUCH) $(XEN_IMAGE).bc)
 
 ifeq (arm,$(CONFIG_UK_ARCH))
 $(XEN_RAW_IMAGE): $(XEN_IMAGE)
