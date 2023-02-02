@@ -4,7 +4,9 @@
 #include <uk/component.h>
 
 #ifndef __SRC_LIBNAME__
-#error "__SRC_LIBNAME__ is not defined"
+#ifndef __VARIANT__
+#error "both __SRC_LIBNAME__ & __VARIANT__ are not defined"
+#endif // __VARIANT__
 #endif // __SRC_LIBNAME__
 
 #ifdef UK_SRC_COMPONENT
@@ -27,9 +29,15 @@
 #undef UK_TRAMPOLINE_NEEDED
 #endif
 
+#ifdef __SRC_LIBNAME__
 #define UK_SRC_COMPONENT UK_LIB_COMPONENT(__SRC_LIBNAME__)
 #define UK_SRC_IS_SHARED UK_LIB_IS_SHARED(__SRC_LIBNAME__)
 #define UK_SRC_SHARE UK_LIB_SHARE(__SRC_LIBNAME__)
+#else // __SRC_LIBNAME__
+#define UK_SRC_COMPONENT UK_LIB_COMPONENT(__VARIANT__)
+#define UK_SRC_IS_SHARED UK_LIB_IS_SHARED(__VARIANT__)
+#define UK_SRC_SHARE UK_LIB_SHARE(__VARIANT__)
+#endif // __SRC_LIBNAME__
 
 #if !defined(CONFIG_COMPONENT_SPLITTING)
 // no shares defined without component splitting
