@@ -182,3 +182,16 @@ $($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y) $(UK_LIBS) $(UK_LIBS-y))) \
 $(eval $(call generate_component_symlist,$(P),$(lastword $($(call uc,$(P))_UK_COMPONENTS)))) \
 )
 endif
+
+#################################################
+#
+# Install analysis rules
+#
+#################################################
+
+ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+$(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+$(eval $(call generate_analysis,$(P),\
+$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y) $(UK_LIBS) $(UK_LIBS-y))) \
+)
+endif
