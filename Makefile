@@ -349,7 +349,7 @@ EACHOLIB_REDEFS :=
 EACHOLIB_REDEFS-y :=
 UK_ALLPLAT_COMPONENTS :=
 COMPONENT_SHARES :=
-UK_DEFAULT_COMPONENTS = 0
+ANALYSIS_REPORTS := 
 
 # Pull in the user's configuration file
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
@@ -634,6 +634,7 @@ DTC		:= dtc
 # Time requires the full path so that subarguments are handled correctly
 TIME		:= $(shell which time)
 LIFTOFF		:= liftoff -e -s
+BCA			:= bitcode-analyzer
 override ARFLAGS:= rcs
 CC_VERSION	:= $(shell $(CC) --version | \
 		   sed -n -r 's/^.* ([0-9]*)\.([0-9]*)\.([0-9]*)[ ]*.*/\1.\2/p')
@@ -641,6 +642,7 @@ CC_VERSION	:= $(shell $(CC) --version | \
 # to select correct optimization parameters for target CPUs.
 CC_VER_MAJOR   := $(word 1,$(subst ., ,$(CC_VERSION)))
 CC_VER_MINOR   := $(word 2,$(subst ., ,$(CC_VERSION)))
+UK_DEFAULT_COMPONENTS := 0
 
 ASFLAGS		+= -DCC_VERSION=$(CC_VERSION)
 CFLAGS		+= -DCC_VERSION=$(CC_VERSION)
@@ -713,7 +715,7 @@ endif
 # include Makefile for platform linking (`Linker.uk`)
 $(foreach plat,$(UK_PLATS),$(eval $(call _import_linker,$(plat))))
 
-.PHONY: prepare preprocess image libs objs clean
+.PHONY: prepare preprocess image analysis bc_libs libs objs clean
 
 fetch: $(UK_FETCH) $(UK_FETCH-y)
 
@@ -733,6 +735,8 @@ bc_objs: $(UK_BC_OBJS) $(UK_BC_OBJS-y)
 
 libs: $(UK_ALIBS) $(UK_ALIBS-y) $(UK_OLIBS) $(UK_OLIBS-y)
 bc_libs: $(UK_BC_OLIBS) $(UK_BC_OLIBS-y)
+
+analysis: $(ANALYSIS_REPORTS)
 
 images: $(UK_DEBUG_IMAGES) $(UK_DEBUG_IMAGES-y) $(UK_IMAGES) $(UK_IMAGES-y)
 
@@ -778,7 +782,7 @@ ukconfig: $(BUILD_DIR)/Makefile menuconfig
 
 all: ukconfig
 
-.PHONY: prepare image libs objs clean-libs clean ukconfig
+.PHONY: prepare image bc_libs libs objs clean-libs clean ukconfig analysis
 
 fetch: ukconfig
 
@@ -789,6 +793,9 @@ preprocess: ukconfig
 objs: ukconfig
 
 libs: ukconfig
+bc_libs: ukconfig
+
+analysis: ukconfig
 
 images: ukconfig
 
@@ -797,7 +804,8 @@ clean-libs clean:
 
 endif
 
-.PHONY: print-vars print-libs print-objs print-srcs print-components help outputmakefile list-defconfigs
+.PHONY: print-vars print-libs print-objs print-srcs help outputmakefile list-defconfigs
+.PHONY: print-components print-analysis
 
 # Configuration
 # ---------------------------------------------------------------------------
@@ -1030,6 +1038,9 @@ print-components:
 		$(foreach L,$(UK_LIBS) $(UK_LIBS-y),\
 		'$(L): $(call lib_components,$(L))\n' \
 		)
+
+print-analysis: $(ANALYSIS_REPORTS)
+	@cat $(ANALYSIS_REPORTS)
 else
 print-libs:
 	$(error Do not have a configuration. Please run one of the configuration targets first)
@@ -1075,6 +1086,7 @@ help:
 	@echo '  preprocess             - run preprocessing steps'
 	@echo '  prepare                - run preparation steps'
 	@echo '  fetch                  - fetch, extract, and patch remote code'
+	@echo '  analysis               - generate bitcode analysis report'
 	@echo ''
 	@echo 'Configuration:'
 	@echo '* menuconfig             - interactive curses-based configurator'
