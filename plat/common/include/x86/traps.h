@@ -37,6 +37,7 @@
 #include <uk/arch/lcpu.h>
 #include <uk/arch/traps.h>
 #include <uk/plat/common/lcpu.h>
+#include <uk/dyn-trampoline.h>
 
 #define TRAP_divide_error        0
 #define TRAP_debug               1
@@ -105,19 +106,25 @@ static inline int _raise_event_##event(int trapnr, struct __regs *regs,	\
 #define _raise_event_NULL(...) (0)
 
 #define DECLARE_TRAP(name, str, event)					\
+UK_COMP_PUBLIC_SECTION(".", "text")	/* trap handler */	\
 void do_##name(struct __regs *regs)					\
 {									\
+	DYN_TRAMPOLINE_INIT;			\
 	if (!_raise_event_##event(TRAP_##name, regs, 0)) {		\
 		do_unhandled_trap(TRAP_##name, str, regs, 0);		\
 	}								\
+	DYN_TRAMPOLINE_FINI;			\
 }
 
 #define DECLARE_TRAP_EC(name, str, event)				\
+UK_COMP_PUBLIC_SECTION(".", "text")	/* trap handler */	\
 void do_##name(struct __regs *regs, unsigned long error_code)		\
 {									\
+	DYN_TRAMPOLINE_INIT;			\
 	if (!_raise_event_##event(TRAP_##name, regs, error_code)) {	\
 		do_unhandled_trap(TRAP_##name, str, regs, error_code);	\
 	}								\
+	DYN_TRAMPOLINE_FINI;			\
 }
 
 void traps_table_init(void);
