@@ -38,10 +38,7 @@
 #include <uk/bitops.h>
 #include <uk/component.h>
 #include <uk/config.h>
-
-#if CONFIG_VMFUNC0_TRAMPOLINES
-#include <uk/trampoline.h>
-#endif
+#include <uk/dyn-trampoline.h>
 
 /* IRQ handlers declarations */
 struct irq_handler {
@@ -96,9 +93,7 @@ extern unsigned long sched_have_pending_events;
 UK_COMP_PUBLIC_SECTION(".", "text") // irq handler
 void _ukplat_irq_handle(unsigned long irq)
 {
-	#if CONFIG_VMFUNC0_TRAMPOLINES
 	DYN_TRAMPOLINE_INIT;
-	#endif
 
 	struct irq_handler *h;
 	int i;
@@ -136,9 +131,7 @@ void _ukplat_irq_handle(unsigned long irq)
 exit_ack:
 	intctrl_ack_irq(irq);
 
-	#if CONFIG_VMFUNC0_TRAMPOLINES
 	DYN_TRAMPOLINE_FINI;
-	#endif
 }
 
 int ukplat_irq_init(struct uk_alloc *a __unused)

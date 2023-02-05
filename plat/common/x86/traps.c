@@ -38,6 +38,7 @@
 #include <uk/print.h>
 #include <uk/assert.h>
 #include <uk/asmdump.h>
+#include <uk/dyn-trampoline.h>
 
 /* A general word of caution when writing trap handlers. The platform trap
  * entry code is set up to properly save general-purpose registers (e.g., rsi,
@@ -89,13 +90,18 @@ void do_unhandled_trap(int trapnr, char *str, struct __regs *regs,
 	UK_CRASH("Crashing\n");
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text") // trap handler
 void do_page_fault(struct __regs *regs, unsigned long error_code)
 {
+	DYN_TRAMPOLINE_INIT;
+
 	unsigned long vaddr = read_cr2();
 	struct ukarch_trap_ctx ctx = {regs, TRAP_page_fault, error_code, vaddr};
 
-	if (uk_raise_event(UKARCH_TRAP_PAGE_FAULT, &ctx))
+	if (uk_raise_event(UKARCH_TRAP_PAGE_FAULT, &ctx)) {
+		DYN_TRAMPOLINE_FINI;
 		return;
+	}
 
 	uk_pr_crit("Unhandled Trap %d (%s), error code=0x%lx\n",
 		   TRAP_page_fault, "page fault", error_code);
@@ -109,4 +115,6 @@ void do_page_fault(struct __regs *regs, unsigned long error_code)
 	dump_mem(regs->rbp);
 	dump_mem(regs->rip);
 	UK_CRASH("Crashing\n");
+
+	DYN_TRAMPOLINE_FINI;
 }
