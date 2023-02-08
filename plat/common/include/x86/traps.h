@@ -37,7 +37,10 @@
 #include <uk/arch/lcpu.h>
 #include <uk/arch/traps.h>
 #include <uk/plat/common/lcpu.h>
+
+#ifndef __ASSEMBLY__
 #include <uk/dyn-trampoline.h>
+#endif
 
 #define TRAP_divide_error        0
 #define TRAP_debug               1
