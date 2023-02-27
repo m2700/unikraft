@@ -32,9 +32,12 @@
  */
 
 #include <errno.h>
+#include <uk/component.h>
 
 #if CONFIG_HAVE_SCHED
+UK_COMP_PUBLIC_SECTION(".", "tbss")
 __thread int errno;
 #else
+UK_COMP_PUBLIC_SECTION(".", "bss")
 int errno;
 #endif /* !CONFIG_HAVE_SCHED */

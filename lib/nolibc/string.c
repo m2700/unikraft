@@ -287,6 +287,7 @@ size_t strspn(const char *s, const char *c)
 UK_COMP_PUBLIC_SECTION(".", "text")
 char *strtok(char *restrict s, const char *restrict sep)
 {
+	UK_COMP_PUBLIC_SECTION(".", "bss")
 	static char *p;
 
 	if (!s && !(s = p))
