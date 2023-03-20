@@ -307,6 +307,8 @@ UK_IMAGES:=
 UK_IMAGES-y:=
 UK_CLEAN :=
 UK_CLEAN-y :=
+UK_COMPONENTS:=
+UK_COMPONENTS-y:=
 ARCHFLAGS :=
 ARCHFLAGS-y :=
 ISR_ARCHFLAGS :=
@@ -347,6 +349,7 @@ EACHOLIB_ALIBS :=
 EACHOLIB_ALIBS-y :=
 EACHOLIB_LOCALS :=
 EACHOLIB_LOCALS-y :=
+UK_DEFAULT_COMPONENT := 0
 
 # Pull in the user's configuration file
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
@@ -784,7 +787,7 @@ clean-libs clean:
 
 endif
 
-.PHONY: print-vars print-libs print-objs print-srcs help outputmakefile list-defconfigs
+.PHONY: print-vars print-libs print-objs print-srcs print-components help outputmakefile list-defconfigs
 
 # Configuration
 # ---------------------------------------------------------------------------
@@ -1006,6 +1009,17 @@ print-srcs:
 		       $(EACHOLIB_SRCS) $(EACHOLIB_SRCS-y)), \
 		'$(L):\n   $($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y)) $(EACHOLIB_SRCS) $(EACHOLIB_SRCS-y)\n'\
 		))
+
+print-components:
+	@echo -e \
+		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),\
+		$(if $(call qstrip,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y)),\
+		$(foreach L,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y), \
+		'$(L): $(call lib_component,$(L))\n' \
+		)))\
+		$(foreach L,$(UK_LIBS) $(UK_LIBS-y),\
+		'$(L): $(call lib_component,$(L))\n' \
+		)
 else
 print-libs:
 	$(error Do not have a configuration. Please run one of the configuration targets first)

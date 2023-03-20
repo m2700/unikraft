@@ -47,7 +47,7 @@
 #define LOAD_ADDR16		0x8000
 #define RELOC16(x)		SEC_RELOC(x, start16, LOAD_ADDR16)
 
-.section .data.boot
+.section .boot.data
 .globl x86_start16_addr
 x86_start16_addr:
 	.quad	LOAD_ADDR16
@@ -55,7 +55,7 @@ x86_start16_addr:
 /* The following section has to be copied to LOAD_ADDR16 (4KiB max!) at runtime
  * as 16-bit real mode entry point
  */
-.section .text.boot.16
+.section .boot.text.16
 SEC_BEGIN(start16)
 
 .code16
@@ -134,7 +134,7 @@ SEC_END(start16)
  * potential platform boot arguments in ESI (e.g., multiboot) if this is the
  * first boot.
  */
-.section .data.boot.32
+.section .boot.data.32
 .align 16
 gdt64:
 gdt64_null:
@@ -161,7 +161,7 @@ gdt64_ptr:
 	| X86_CR0_PG	/* Paging */
 
 .code32
-.section .text.boot.32
+.section .boot.text.32
 ENTRY(lcpu_start32)
 	/* Enable physical address extension (PAE) */
 	movl	$CR4_BOOT32_SETTINGS, %eax
@@ -217,7 +217,7 @@ END(lcpu_start32)
 #include "lcpu_helpers.S"
 
 .code64
-.section .text.boot.64
+.section .boot.text.64
 ENTRY(lcpu_start64)
 	/* Save the startup args pointer */
 	movq	%rdi, %r8

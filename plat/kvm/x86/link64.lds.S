@@ -36,14 +36,15 @@ SECTIONS
 	.text :
 	{
 		/* prevent linker gc from removing multiboot header */
-		KEEP (*(.data.boot))
-		KEEP (*(.data.boot.*))
-		*(.text.boot)
-		*(.text.boot.*)
+		KEEP (*(.boot.data))
+		KEEP (*(.boot.data.*))
+		*(.boot.text)
+		*(.boot.text.*)
 
 		*(.text)
 		*(.text.*)
 	}
+	COMPONENT_TEXT_SECTIONS
 	_etext = .;
 
 	EXCEPTION_SECTIONS
@@ -62,6 +63,7 @@ SECTIONS
 		*(.rodata)
 		*(.rodata.*)
 	}
+	COMPONENT_RODATA_SECTIONS
 	_erodata = .;
 
 	/* Constructor tables (read-only) */
