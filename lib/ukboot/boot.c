@@ -170,10 +170,6 @@ static void main_thread_func(void *arg)
 	}
 	uk_pr_info("])\n");
 
-	#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
-	eptlib_kvm_init_ept_section_isolation(UK_COMPONENT);
-	#endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
-
 	#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
 	ukplat_timestamp_main();
 	#endif
@@ -222,6 +218,10 @@ void ukplat_entry(int argc, char *argv[])
 #endif
 
 	uk_ctor_func_t *ctorfn;
+
+#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
+	eptlib_kvm_init_ept_section_isolation(UK_COMPONENT);
+#endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
 
 	uk_pr_info("Unikraft constructor table at %p - %p\n",
 		   &uk_ctortab_start[0], &uk_ctortab_end);
