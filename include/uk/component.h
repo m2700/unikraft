@@ -1,8 +1,19 @@
 #pragma once
 
 #include <uk/config.h>
-#include <uk/essentials.h>
 #include <uk/component-local.h>
+
+#ifndef STRINGIFY
+#ifndef __STRINGIFY
+#define __STRINGIFY(x) #x
+#endif
+#define STRINGIFY(x) __STRINGIFY(x)
+#endif
+
+#ifndef UK_CONCAT
+#define __UK_CONCAT_X(a, b) a##b
+#define UK_CONCAT(a, b) __UK_CONCAT_X(a, b)
+#endif
 
 #ifndef __LIBNAME__
 #error "__LIBNAME__ not defined"
