@@ -51,6 +51,10 @@
 #include <uk/falloc.h>
 #endif /* CONFIG_PAGING */
 
+#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+#include <kvm/tscclock.h>
+#endif
+
 #define PLATFORM_MEM_START 0x100000
 #define PLATFORM_MAX_MEM_ADDR 0x100000000 /* 4 GiB */
 
@@ -451,6 +455,10 @@ void _libkvmplat_entry(struct lcpu *lcpu, void *arg)
 {
 	struct multiboot_info *mi = (struct multiboot_info *)arg;
 	int rc;
+
+#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+	tscclock_timestamp_boot();
+#endif
 
 	_libkvmplat_init_console();
 

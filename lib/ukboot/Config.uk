@@ -117,4 +117,8 @@ if LIBUKBOOT
 		bool "None"
 
 	endchoice
+
+	config LIBUKBOOT_TIMESTAMP
+	bool "Enable time stamp creation for beginning and end of boot"
+	depends on ARCH_X86_64 && PLAT_KVM
 endif

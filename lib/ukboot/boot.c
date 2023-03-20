@@ -151,6 +151,10 @@ static void main_thread_func(void *arg)
 	}
 	uk_pr_info("])\n");
 
+	#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+	ukplat_timestamp_main();
+	#endif
+
 	ret = main(tma->argc, tma->argv);
 	uk_pr_info("main returned %d, halting system\n", ret);
 	ret = (ret != 0) ? UKPLAT_CRASH : UKPLAT_HALT;

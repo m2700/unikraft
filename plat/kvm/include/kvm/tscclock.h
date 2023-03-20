@@ -33,6 +33,10 @@
 #ifndef __KVM_TSCCLOCK_H__
 #define __KVM_TSCCLOCK_H__
 
+__u64 tscclock_boot_delay_nanos(void);
+void tscclock_timestamp_boot(void);
+void tscclock_timestamp_main(void);
+
 int tscclock_init(void);
 __u64 tscclock_monotonic(void);
 __u64 tscclock_epochoffset(void);

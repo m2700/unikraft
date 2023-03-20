@@ -105,6 +105,20 @@ static __u64 tsc_base;
 /* Multiplier for converting TSC ticks to nsecs. (0.32) fixed point. */
 static __u32 tsc_mult;
 
+#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+__u64 boot_rdtsc;
+__u64 main_rdtsc;
+__u64 tscclock_boot_delay_nanos(void) {
+    return mul64_32(main_rdtsc - boot_rdtsc, tsc_mult);
+}
+void tscclock_timestamp_boot(void) {
+	boot_rdtsc = rdtsc();
+}
+void tscclock_timestamp_main(void) {
+	main_rdtsc = rdtsc();
+}
+#endif // CONFIG_LIBUKBOOT_TIMESTAMP
+
 /*
  * Multiplier for converting nsecs to PIT ticks. (1.32) fixed point.
  *
