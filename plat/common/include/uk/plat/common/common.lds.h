@@ -121,7 +121,7 @@
 	}
 
 #define TLS_SECTIONS							\
-	. = ALIGN(0x20);						\
+	. = ALIGN(TLS_ALIGN);						\
 	_tls_start = .;							\
 	.tdata :							\
 	{								\
@@ -138,15 +138,15 @@
 		*(.gnu.linkonce.tb.*)					\
 		. = ALIGN(0x20);					\
 	}								\
+	. = . + SIZEOF(.tbss);			\
 	COMPONENT_TBSS_SECTIONS			\
+	_tls_end = .;					\
 	/*								\
 	 * NOTE: Because the .tbss section is zero-sized in the final	\
-	 *       ELF image, just setting _tls_end to the end of it	\
-	 *       does not give us the the size of the memory area once	\
-	 *       loaded, so we use SIZEOF to have it point to the end.	\
-	 *       _tls_end is only used to compute the .tbss size.	\
+	 *       ELF image, we need to reset . to it's original state	\
+	 *       after incrementing		\
 	 */								\
-	_tls_end = . + SIZEOF(.tbss);
+	. = ADDR(.tbss);
 
 #define DATA_SECTIONS							\
 	/* Read-write data (initialized) */				\

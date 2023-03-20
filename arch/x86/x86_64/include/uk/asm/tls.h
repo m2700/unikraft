@@ -36,6 +36,7 @@
 
 #include <uk/arch/types.h>
 #include <string.h>
+#include <uk/arch/limits.h>
 
 extern char _tls_start[], _etdata[], _tls_end[];
 
@@ -53,7 +54,7 @@ static inline __sz ukarch_tls_area_align(void)
 	/* The minimal required TLS area alignment should ideally come from the
 	 * ELF header, but 32 should be fine for all use X86_64 instructions.
 	 */
-	return 32;
+	return TLS_ALIGN;
 }
 
 static inline void ukarch_tls_area_copy(void *tls_area)
