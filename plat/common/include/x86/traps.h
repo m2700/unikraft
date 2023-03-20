@@ -39,6 +39,7 @@
 #include <uk/plat/common/lcpu.h>
 
 #ifndef __ASSEMBLY__
+#include <uk/component.h>
 #include <uk/dyn-trampoline.h>
 #endif
 
