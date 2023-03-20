@@ -32,11 +32,13 @@
  */
 
 #include <errno.h>
+#include <uk/component.h>
 
 /* Works only for single-threaded unikernels only,
  * errno should be placed on the beginning of each
  * thread's stack instead
  */
+UK_COMP_PUBLIC_SECTION(".", "bss")
 static int __errno;
 
 int *_nolibc_errno(void)
