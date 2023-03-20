@@ -80,14 +80,16 @@
 #include "banner.h"
 
 #ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
-#define __HEADER_LIBNAME__ libukboot_main
-#include <uk/header-component.h>
+#define __SRC_LIBNAME__ libukboot_main
+#include <uk/trampoline-share.h>
 #endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
+
 
 int main(int argc, char *argv[]) __weak;
 
-#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
-TRAMPOLINE(main, (int argc, char *argv[]))
+#if defined(CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION)                               \
+    && UK_COMPONENT != UK_SRC_COMPONENT
+STATIC_TRAMPOLINE(main, (int argc, char *argv[]))
 #define main __tr_main
 #endif // CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
 
