@@ -65,9 +65,10 @@
 
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define UK_COMP_PREFIX_SECTION(prefix, dot, section)                           \
-	__section("." prefix "." section)
+	__attribute__((section("." prefix "." section)))
 #else // CONFIG_COMPONENT_SPLITTING
-#define UK_COMP_PREFIX_SECTION(prefix, dot, section) __section(dot section)
+#define UK_COMP_PREFIX_SECTION(prefix, dot, section)                           \
+	__attribute__((section(dot section)))
 #endif // CONFIG_COMPONENT_SPLITTING
 
 #define UK_COMP_PUBLIC_SECTION(dot, section)                                   \
