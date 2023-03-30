@@ -1,4 +1,18 @@
-config LIBUKTIME
+menuconfig LIBUKTIME
        bool "uktime: Time functions"
        default n
        select HAVE_TIME
+
+if LIBUKTIME
+	config LIBUKTIME_PROFILING
+		bool "Enable profiling"
+		default n
+	
+	config LIBUKTIME_PROFILING_ARRAY_SIZE
+		int "Maximum number of measurements"
+		default 1024
+		range 1 1000000
+		depends on LIBUKTIME_PROFILING
+		help
+			The size of the array used to store the measurements.
+endif
