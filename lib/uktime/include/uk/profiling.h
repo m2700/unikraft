@@ -54,8 +54,6 @@ extern __nsec uk_prf_ns_delays[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
 	__MEASURE_TSC(name)
 
 #define UK_PRF_END(name)                                                       \
-	uk_prf_delays[__uk_prf_id_##name - 1] +=                               \
-	    ukplat_monotonic_clock() - __uk_prf_ts_##name;                     \
 	__SAVE_TSC(name);                                                      \
 	__SAVE_NS(name)
 

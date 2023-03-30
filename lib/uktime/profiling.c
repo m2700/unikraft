@@ -35,8 +35,15 @@ void print_profiling_results()
 {
 	DYN_TRAMPOLINE_INIT;
 	for (__sz i = 0; i < uk_prf_id_count; i++) {
-		printf("Profiling: %s: %llu ns, %llu times\n", uk_prf_names[i],
-		       uk_prf_delays[i], uk_prf_counts[i]);
+		printf("Profiling: %s: %lu times", uk_prf_names[i],
+		       uk_prf_counts[i]);
+#if CONFIG_LIBUKTIME_PROFILING_TSC
+		printf(", %lu tsc", uk_prf_tsc_delays[i]);
+#endif
+#if CONFIG_LIBUKTIME_PROFILING_MONOTONIC
+		printf(", %lu ns", uk_prf_ns_delays[i]);
+#endif
+		printf("\n");
 	}
 	DYN_TRAMPOLINE_FINI;
 }
