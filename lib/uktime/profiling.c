@@ -22,7 +22,7 @@ UK_COMP_PUBLIC_SECTION(".", "text")
 void print_profiling_results()
 {
 	for (__sz i = 0; i < uk_prf_id_count; i++) {
-		uk_pr_info("Profiling: %s: %llu ns, %llu times\n",
-			   uk_prf_names[i], uk_prf_delays[i], uk_prf_counts[i]);
+		printf("Profiling: %s: %llu ns, %llu times\n", uk_prf_names[i],
+		       uk_prf_delays[i], uk_prf_counts[i]);
 	}
 }
