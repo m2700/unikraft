@@ -4,6 +4,7 @@
 #include <uk/plat/time.h>
 #include <uk/component.h>
 #include <uk/essentials.h>
+#include <stdio.h>
 
 #if CONFIG_LIBUKTIME_PROFILING
 
@@ -17,10 +18,12 @@ extern __sz uk_prf_id_count;
 #define UK_PRF_START(name)                                                     \
 	UK_COMP_PUBLIC_SECTION(".", "bss")                                     \
 	static __sz __uk_prf_id_##name = 0;                                    \
-	__uk_prf_id_##name = __uk_prf_id_##name || ++uk_prf_id_count;          \
+	if (__uk_prf_id_##name == 0) {                                         \
+		__uk_prf_id_##name = ++uk_prf_id_count;                        \
+	}                                                                      \
 	uk_prf_counts[__uk_prf_id_##name - 1]++;                               \
 	uk_prf_names[__uk_prf_id_##name - 1] = #name;                          \
-	__nsec __uk_prf_ts_##name = ukplat_monotonic_clock()
+	__nsec __uk_prf_ts_##name = ukplat_monotonic_clock();
 
 #define UK_PRF_END(name)                                                       \
 	uk_prf_delays[__uk_prf_id_##name - 1] +=                               \
