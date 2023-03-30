@@ -37,6 +37,7 @@
 #include <uk/assert.h>
 #include <uk/alloc.h>
 #include <string.h>
+#include <uk/component.h>
 
 void halt(void);
 void system_off(void);
@@ -59,6 +60,7 @@ struct _x86_features {
 
 extern struct _x86_features x86_cpu_features;
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void cpuid(__u32 fn, __u32 subfn,
 			 __u32 *eax, __u32 *ebx,
 			 __u32 *ecx, __u32 *edx)
@@ -159,23 +161,27 @@ static inline void _init_cpufeatures(void)
 
 unsigned long read_cr2(void);
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void write_cr3(unsigned long cr3)
 {
 	asm volatile("mov %0, %%cr3" : : "r"(cr3) : "memory");
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void invlpg(unsigned long va)
 {
 	asm volatile("invlpg %0" : : "m"(*(const char *)(va)) : "memory");
 }
 
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void rdmsr(unsigned int msr, __u32 *lo, __u32 *hi)
 {
 	asm volatile("rdmsr" : "=a"(*lo), "=d"(*hi)
 			     : "c"(msr));
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline __u64 rdmsrl(unsigned int msr)
 {
 	__u32 lo, hi;
@@ -184,6 +190,7 @@ static inline __u64 rdmsrl(unsigned int msr)
 	return ((__u64) lo | (__u64) hi << 32);
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void wrmsr(unsigned int msr, __u32 lo, __u32 hi)
 {
 	asm volatile("wrmsr"
@@ -191,12 +198,14 @@ static inline void wrmsr(unsigned int msr, __u32 lo, __u32 hi)
 			     : "c"(msr), "a"(lo), "d"(hi));
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void wrmsrl(unsigned int msr, __u64 val)
 {
 	wrmsr(msr, (__u32) (val & 0xffffffffULL), (__u32) (val >> 32));
 }
 
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline __u64 rdtsc(void)
 {
 	__u64 l, h;
@@ -207,6 +216,7 @@ static inline __u64 rdtsc(void)
 
 
 /* accessing devices via port space */
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline __u8 inb(__u16 port)
 {
 	__u8 v;
@@ -215,6 +225,7 @@ static inline __u8 inb(__u16 port)
 	return v;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline __u16 inw(__u16 port)
 {
 	__u16 v;
@@ -223,6 +234,7 @@ static inline __u16 inw(__u16 port)
 	return v;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline __u32 inl(__u16 port)
 {
 	__u32 v;
@@ -231,6 +243,7 @@ static inline __u32 inl(__u16 port)
 	return v;
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline __u64 inq(__u16 port_lo)
 {
 	__u16 port_hi = port_lo + 4;
@@ -242,21 +255,25 @@ static inline __u64 inq(__u16 port_lo)
 	return ((__u64) lo) | ((__u64) hi << 32);
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void outb(__u16 port, __u8 v)
 {
 	__asm__ __volatile__("outb %0,%1" : : "a"(v), "dN"(port));
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void outw(__u16 port, __u16 v)
 {
 	__asm__ __volatile__("outw %0,%1" : : "a"(v), "dN"(port));
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void outl(__u16 port, __u32 v)
 {
 	__asm__ __volatile__("outl %0,%1" : : "a" (v), "dN" (port));
 }
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline __u64 mul64_32(__u64 a, __u32 b)
 {
 	__u64 prod;
@@ -337,6 +354,7 @@ static inline void _init_syscall(void)
 #endif /* CONFIG_HAVE_SYSCALL */
 
 #if CONFIG_HAVE_X86PKU
+UK_COMP_PUBLIC_SECTION(".", "text")
 static inline void _check_ospke(void)
 {
 	__u32 eax, ebx, ecx, edx;
