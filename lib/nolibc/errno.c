@@ -41,6 +41,7 @@
 UK_COMP_PUBLIC_SECTION(".", "bss")
 static int __errno;
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 int *_nolibc_errno(void)
 {
 	return &__errno;
