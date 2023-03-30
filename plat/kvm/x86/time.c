@@ -51,7 +51,7 @@ void ukplat_timestamp_main(void) {
 	tscclock_timestamp_main();
 }
 UK_COMP_PUBLIC_SECTION(".", "text")
-__u64 ukplat_boot_delay_nanos(void) {
+__nsec ukplat_boot_delay_nanos(void) {
     return tscclock_boot_delay_nanos();
 }
 #endif // CONFIG_LIBUKBOOT_TIMESTAMP
