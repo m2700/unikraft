@@ -140,14 +140,14 @@ def symlist_mapping_expr(comp_share: Iterable[int], comp_num: int) -> str:
             {start_sym(share_to_section_name(comp_share, "rodata"))},
             {end_sym(share_to_section_name(comp_share, "rodata"))},
         }},
-        .tdata_extents = {{
-            {start_sym(share_to_section_name(comp_share, "tdata"))},
-            {end_sym(share_to_section_name(comp_share, "tdata"))},
-        }},
-        .tbss_extents = {{
-            {start_sym(share_to_section_name(comp_share, "tbss"))},
-            {end_sym(share_to_section_name(comp_share, "tbss"))},
-        }},
+        // .tdata_extents = {{
+        //     {start_sym(share_to_section_name(comp_share, "tdata"))},
+        //     {end_sym(share_to_section_name(comp_share, "tdata"))},
+        // }},
+        // .tbss_extents = {{
+        //     {start_sym(share_to_section_name(comp_share, "tbss"))},
+        //     {end_sym(share_to_section_name(comp_share, "tbss"))},
+        // }},
         .data_extents = {{
             {start_sym(share_to_section_name(comp_share, "data"))},
             {end_sym(share_to_section_name(comp_share, "data"))},
