@@ -20,6 +20,11 @@ CINCLUDES    += -I$(CONFIG_UK_BASE)/include
 CXXINCLUDES  += -I$(CONFIG_UK_BASE)/include
 GOCINCLUDES  += -I$(CONFIG_UK_BASE)/include
 
+ASINCLUDES   += -I$(CONFIG_UK_BASE)/plat/common/include
+CINCLUDES   += -I$(CONFIG_UK_BASE)/plat/common/include
+CXXINCLUDES   += -I$(CONFIG_UK_BASE)/plat/common/include
+GOCINCLUDES   += -I$(CONFIG_UK_BASE)/plat/common/include
+
 RUSTCFLAGS-y	+= --emit=obj --crate-type=rlib --edition=2018 \
 		-Cpanic=abort -Cembed-bitcode=n \
 		-Zbinary_dep_depinfo=y -Zsymbol-mangling-version=v0 \
