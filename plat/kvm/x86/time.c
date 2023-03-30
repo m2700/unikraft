@@ -43,23 +43,28 @@
 #include <uk/plat/irq.h>
 #include <kvm/tscclock.h>
 #include <uk/assert.h>
+#include <uk/component.h>
 
 #ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+UK_COMP_PUBLIC_SECTION(".", "text")
 void ukplat_timestamp_main(void) {
 	tscclock_timestamp_main();
 }
+UK_COMP_PUBLIC_SECTION(".", "text")
 __u64 ukplat_boot_delay_nanos(void) {
     return tscclock_boot_delay_nanos();
 }
 #endif // CONFIG_LIBUKBOOT_TIMESTAMP
 
 /* return ns since time_init() */
+UK_COMP_PUBLIC_SECTION(".", "text")
 __nsec ukplat_monotonic_clock(void)
 {
 	return tscclock_monotonic();
 }
 
 /* return wall time in nsecs */
+UK_COMP_PUBLIC_SECTION(".", "text")
 __nsec ukplat_wall_clock(void)
 {
 	return tscclock_monotonic() + tscclock_epochoffset();

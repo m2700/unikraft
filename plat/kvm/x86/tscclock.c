@@ -59,6 +59,7 @@
 #include <uk/print.h>
 #include <uk/assert.h>
 #include <uk/bitops.h>
+#include <uk/component.h>
 
 #define TIMER_CNTR           0x40
 #define TIMER_MODE           0x43
@@ -92,6 +93,7 @@
 #endif
 
 /* RTC wall time offset at monotonic time base. */
+UK_COMP_PUBLIC_SECTION(".", "bss")
 static __u64 rtc_epochoffset;
 
 /*
@@ -99,21 +101,29 @@ static __u64 rtc_epochoffset;
  */
 
 /* Base time values at the last call to tscclock_monotonic(). */
+UK_COMP_PUBLIC_SECTION(".", "bss")
 static __u64 time_base;
+UK_COMP_PUBLIC_SECTION(".", "bss")
 static __u64 tsc_base;
 
 /* Multiplier for converting TSC ticks to nsecs. (0.32) fixed point. */
+UK_COMP_PUBLIC_SECTION(".", "bss")
 static __u32 tsc_mult;
 
 #ifdef CONFIG_LIBUKBOOT_TIMESTAMP
+UK_COMP_PUBLIC_SECTION(".", "bss")
 __u64 boot_rdtsc;
+UK_COMP_PUBLIC_SECTION(".", "bss")
 __u64 main_rdtsc;
+UK_COMP_PUBLIC_SECTION(".", "text")
 __u64 tscclock_boot_delay_nanos(void) {
     return mul64_32(main_rdtsc - boot_rdtsc, tsc_mult);
 }
+UK_COMP_PUBLIC_SECTION(".", "text")
 void tscclock_timestamp_boot(void) {
 	boot_rdtsc = rdtsc();
 }
+UK_COMP_PUBLIC_SECTION(".", "text")
 void tscclock_timestamp_main(void) {
 	main_rdtsc = rdtsc();
 }
@@ -210,6 +220,7 @@ static __u64 rtc_gettimeofday(void)
 /*
  * Return monotonic time using TSC clock.
  */
+UK_COMP_PUBLIC_SECTION(".", "text")
 __u64 tscclock_monotonic(void)
 {
 	__u64 tsc_now, tsc_delta;
@@ -311,6 +322,7 @@ int tscclock_init(void)
 /*
  * Return epoch offset (wall time offset to monotonic clock start).
  */
+UK_COMP_PUBLIC_SECTION(".", "text")
 __u64 tscclock_epochoffset(void)
 {
 	return rtc_epochoffset;
