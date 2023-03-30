@@ -135,7 +135,7 @@
 	}
 
 #define TLS_SECTIONS							\
-	. = ALIGN(TLS_ALIGN);						\
+	. = ALIGN(0x20);						\
 	_tls_start = .;							\
 	.tdata :							\
 	{								\
@@ -143,7 +143,6 @@
 		*(.tdata.*)						\
 		*(.gnu.linkonce.td.*)					\
 	}								\
-	COMPONENT_TDATA_SECTIONS		\
 	_etdata = .;							\
 	.tbss :								\
 	{								\
@@ -152,15 +151,7 @@
 		*(.gnu.linkonce.tb.*)					\
 		. = ALIGN(0x20);					\
 	}								\
-	. = . + SIZEOF(.tbss);			\
-	COMPONENT_TBSS_SECTIONS			\
-	_tls_end = .;					\
-	/*								\
-	 * NOTE: Because the .tbss section is zero-sized in the final	\
-	 *       ELF image, we need to reset . to it's original state	\
-	 *       after incrementing		\
-	 */								\
-	. = ADDR(.tbss);
+	_tls_end = . + SIZEOF(.tbss);
 
 #define DATA_SECTIONS							\
 	/* Read-write data (initialized) */				\

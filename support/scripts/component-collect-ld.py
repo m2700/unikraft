@@ -284,7 +284,9 @@ SECTIONS
 
 
 def symlist_impl(opt: argparse.Namespace) -> str:
-    sections = ["text", "rodata", "tdata", "tbss", "data", "bss"]
+    sections = ["text", "rodata",
+                # "tdata", "tbss",
+                "data", "bss"]
 
     extent_attrs = []
     for section in sections:
