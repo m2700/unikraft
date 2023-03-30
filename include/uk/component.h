@@ -10,6 +10,10 @@
 #define STRINGIFY(x) __STRINGIFY(x)
 #endif
 
+#ifndef __section
+#define __section(s) __attribute__((section(s)))
+#endif
+
 #ifndef UK_CONCAT
 #define __UK_CONCAT_X(a, b) a##b
 #define UK_CONCAT(a, b) __UK_CONCAT_X(a, b)
@@ -65,10 +69,9 @@
 
 #ifdef CONFIG_COMPONENT_SPLITTING
 #define UK_COMP_PREFIX_SECTION(prefix, dot, section)                           \
-	__attribute__((section("." prefix "." section)))
+	__section("." prefix "." section)
 #else // CONFIG_COMPONENT_SPLITTING
-#define UK_COMP_PREFIX_SECTION(prefix, dot, section)                           \
-	__attribute__((section(dot section)))
+#define UK_COMP_PREFIX_SECTION(prefix, dot, section) __section(dot section)
 #endif // CONFIG_COMPONENT_SPLITTING
 
 #define UK_COMP_PUBLIC_SECTION(dot, section)                                   \
