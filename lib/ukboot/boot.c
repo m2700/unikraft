@@ -72,9 +72,24 @@
 #ifdef CONFIG_LIBUKSP
 #include <uk/sp.h>
 #endif
+#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
+#include <uk/ept-isolation.h>
+#include <uk/component.h>
+#include <uk/trampoline.h>
+#endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
 #include "banner.h"
 
+#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
+#define __HEADER_LIBNAME__ libukboot_main
+#include <uk/header-component.h>
+#endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
+
 int main(int argc, char *argv[]) __weak;
+
+#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
+TRAMPOLINE(main, (int argc, char *argv[]))
+#define main __tr_main
+#endif // CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
 
 static void main_thread_func(void *arg) __noreturn;
 
@@ -152,6 +167,10 @@ static void main_thread_func(void *arg)
 			uk_pr_info(", ");
 	}
 	uk_pr_info("])\n");
+
+	#ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
+	eptlib_kvm_init_ept_section_isolation();
+	#endif /* CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION */
 
 	#ifdef CONFIG_LIBUKBOOT_TIMESTAMP
 	ukplat_timestamp_main();

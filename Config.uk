@@ -219,6 +219,13 @@ config COMPONENT_SPLITTING
 		Enable component splitting. This option will split the
 		app image's binary sections into multiple components.
 		Each component has two symbols marking the beginning and end addresses.
+
+config VMFUNC0_TRAMPOLINES
+	bool "Automated VMFUNC trampoline generation"
+	default n
+	depends on COMPONENT_SPLITTING
+	help
+		Enable automated trampoline generation with ept-switch to component IDs.
 endmenu
 
 if !NO_APP
