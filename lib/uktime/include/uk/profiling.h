@@ -3,6 +3,7 @@
 #include <uk/config.h>
 #include <uk/plat/time.h>
 #include <uk/component.h>
+#include <uk/essentials.h>
 
 #if CONFIG_LIBUKTIME_PROFILING
 
@@ -10,12 +11,12 @@ void print_profiling_results();
 
 extern char const *uk_prf_names[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
 extern __nsec uk_prf_delays[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
-extern size_t uk_prf_counts[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
-extern size_t uk_prf_id_count;
+extern __sz uk_prf_counts[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
+extern __sz uk_prf_id_count;
 
 #define UK_PRF_START(name)                                                     \
-	UK_COMP_PUBLIC_SECTION(".", ".bss")                                    \
-	static size_t __uk_prf_id_##name = 0;                                  \
+	UK_COMP_PUBLIC_SECTION(".", "bss")                                     \
+	static __sz __uk_prf_id_##name = 0;                                    \
 	__uk_prf_id_##name = __uk_prf_id_##name || ++uk_prf_id_count;          \
 	uk_prf_counts[__uk_prf_id_##name]++;                                   \
 	uk_prf_names[__uk_prf_id_##name] = #name;                              \
