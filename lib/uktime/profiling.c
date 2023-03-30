@@ -4,7 +4,7 @@
 #include <uk/plat/time.h>
 #include <uk/component.h>
 #include <uk/print.h>
-#include <uk/essentials.h>
+#include <uk/stdio.h>
 
 UK_COMP_PUBLIC_SECTION(".", "bss")
 char const *uk_prf_names[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
