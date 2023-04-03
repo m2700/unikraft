@@ -6,6 +6,7 @@
 #include <uk/print.h>
 #include <stdio.h>
 #include <uk/dyn-trampoline.h>
+#include <stdbool.h>
 
 #if CONFIG_LIBUKTIME_PROFILING_TSC
 #include <x86/cpu.h>

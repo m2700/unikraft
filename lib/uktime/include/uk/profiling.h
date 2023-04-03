@@ -5,6 +5,7 @@
 #include <uk/component.h>
 #include <uk/essentials.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #if CONFIG_LIBUKTIME_PROFILING_TSC
 #include <x86/cpu.h>
