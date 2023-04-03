@@ -37,6 +37,8 @@ __u64 tscclock_boot_delay_nanos(void);
 void tscclock_timestamp_boot(void);
 void tscclock_timestamp_main(void);
 
+__u64 tscclock_tsc_to_ns(__u64 tsc);
+
 int tscclock_init(void);
 __u64 tscclock_monotonic(void);
 __u64 tscclock_epochoffset(void);

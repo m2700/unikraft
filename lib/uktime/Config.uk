@@ -15,17 +15,4 @@ if LIBUKTIME
 		depends on LIBUKTIME_PROFILING
 		help
 			The size of the array used to store the measurements.
-	
-	config LIBUKTIME_PROFILING_MONOTONIC
-		bool "monotonic time measurement in nanoseconds"
-		default y
-		depends on LIBUKTIME_PROFILING
-	
-	config LIBUKTIME_PROFILING_TSC
-		bool "TSC measurement"
-		default n
-		depends on LIBUKTIME_PROFILING
-		depends on ARCH_X86_64
-		help
-			Measurements using the processor internal time step counter.
 endif

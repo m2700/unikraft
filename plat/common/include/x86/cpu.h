@@ -214,6 +214,18 @@ static inline __u64 rdtsc(void)
 	return (h << 32) | l;
 }
 
+#define rdtsc_ordered()                                                        \
+	({                                                                     \
+		__u64 l, h;                                                    \
+		__asm__ __volatile__("lfence;"                                 \
+				     "rdtsc;"                                  \
+				     "lfence;"                                 \
+				     : "=a"(l), "=d"(h)                        \
+				     :                                         \
+				     : "memory");                              \
+		(h << 32) | l;                                                 \
+	})
+
 
 /* accessing devices via port space */
 UK_COMP_PUBLIC_SECTION(".", "text")

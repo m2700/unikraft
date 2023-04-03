@@ -42,7 +42,6 @@ uk_syscall_e_timer_getoverrun
 uk_syscall_r_timer_getoverrun
 uk_prf_names
 uk_prf_tsc_delays
-uk_prf_ns_delays
 uk_prf_counts
 uk_prf_id_count
 print_profiling_results

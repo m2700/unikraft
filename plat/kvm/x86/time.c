@@ -56,6 +56,11 @@ __nsec ukplat_boot_delay_nanos(void) {
 }
 #endif // CONFIG_LIBUKBOOT_TIMESTAMP
 
+UK_COMP_PUBLIC_SECTION(".", "text")
+__nsec tsc_to_ns(__u64 tsc) {
+	return tscclock_tsc_to_ns(tsc);
+}
+
 /* return ns since time_init() */
 UK_COMP_PUBLIC_SECTION(".", "text")
 __nsec ukplat_monotonic_clock(void)
