@@ -12,7 +12,7 @@
 
 #if CONFIG_LIBUKTIME_PROFILING
 
-void print_profiling_results();
+void print_profiling_results(bool print_avg, bool print_total);
 
 extern char const *uk_prf_names[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
 extern __sz uk_prf_counts[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
