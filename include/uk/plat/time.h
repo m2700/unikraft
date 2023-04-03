@@ -36,6 +36,7 @@
 
 #include <uk/arch/time.h>
 #include <stdint.h>
+#include <uk/essentials.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +54,10 @@ uint32_t ukplat_time_get_irq(void);
 __nsec ukplat_time_get_ticks(void);
 __nsec ukplat_monotonic_clock(void);
 __nsec ukplat_wall_clock(void);
+
+__weak __nsec tsc_to_ns(__u64 tsc) {
+	return -1;
+}
 
 /* Time tick length */
 #define UKPLAT_TIME_TICK_NSEC  (UKARCH_NSEC_PER_SEC / CONFIG_HZ)
