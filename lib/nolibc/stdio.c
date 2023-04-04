@@ -61,6 +61,7 @@
 #include <stdarg.h>
 
 #include <uk/plat/console.h>
+#include <uk/component.h>
 
 /* 64 bits + 0-Byte at end */
 #define MAXNBUF 65
@@ -68,8 +69,11 @@
 /* basic support, gives the notion of having standard files but they do not have
  * any meaning
  */
+UK_COMP_PUBLIC_SECTION(".", "data")
 FILE *stdin = (FILE *)&stdin;
+UK_COMP_PUBLIC_SECTION(".", "data")
 FILE *stdout = (FILE *)&stdout;
+UK_COMP_PUBLIC_SECTION(".", "data")
 FILE *stderr = (FILE *)&stderr;
 
 static char const hex2ascii_data[] = "0123456789abcdefghijklmnopqrstuvwxyz";
