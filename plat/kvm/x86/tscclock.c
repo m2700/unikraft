@@ -129,6 +129,7 @@ void tscclock_timestamp_main(void) {
 }
 #endif // CONFIG_LIBUKBOOT_TIMESTAMP
 
+UK_COMP_PUBLIC_SECTION(".", "text")
 __u64 tscclock_tsc_to_ns(__u64 tsc) {
 	return mul64_32(tsc, tsc_mult);
 }
