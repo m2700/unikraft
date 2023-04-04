@@ -26,6 +26,8 @@ void print_profiling_results(bool print_avg, bool print_total)
 {
 	DYN_TRAMPOLINE_INIT;
 	for (__sz i = 0; i < uk_prf_id_count; i++) {
+		if (uk_prf_counts[i] == 0)
+			continue;
 		printf("Profiling: %s: %lu times", uk_prf_names[i],
 		       uk_prf_counts[i]);
 		if (print_total) {
