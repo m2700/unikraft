@@ -23,8 +23,8 @@ extern __u64 uk_prf_tsc_delays[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
 	uk_prf_tsc_delays[__uk_prf_id_##name - 1] +=                           \
 	    rdtsc_ordered() - __uk_prf_tsc_##name
 
-#define PRF_ID_LOCAL(name) __sz __uk_prf_id_##name = ++uk_prf_id_count
-#define PRF_ID_STATIC(name)                                                    \
+#define UK_PRF_ID_LOCAL(name) __sz __uk_prf_id_##name = ++uk_prf_id_count
+#define UK_PRF_ID_STATIC(name)                                                    \
 	UK_COMP_PUBLIC_SECTION(".", "bss")                                     \
 	static __sz __uk_prf_id_##name = 0;                                    \
 	if (__uk_prf_id_##name == 0) {                                         \
@@ -38,10 +38,10 @@ extern __u64 uk_prf_tsc_delays[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
 	uk_prf_names[__uk_prf_id_##name - 1] = #name;                          \
 	__MEASURE_TSC(name)
 
-#define UK_PRF_START(name) __UK_PRF_START(name, PRF_ID_STATIC)
+#define UK_PRF_START(name) __UK_PRF_START(name, UK_PRF_ID_STATIC)
 #define UK_PRF_BEGIN(name) __UK_PRF_START(name, __PRF_ID_NONE)
 
-#define UK_PRF_START_SINGLE(name) __UK_PRF_START(name, PRF_ID_LOCAL)
+#define UK_PRF_START_SINGLE(name) __UK_PRF_START(name, UK_PRF_ID_LOCAL)
 
 #define UK_PRF_ITER(name) __uk_prf_id_##name = ++uk_prf_id_count
 
