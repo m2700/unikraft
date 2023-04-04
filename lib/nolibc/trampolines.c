@@ -1,4 +1,4 @@
 #include <uk/auto-trampoline.h>
 
-AUTO_TRAMPOLINE(printf)
-AUTO_TRAMPOLINE(fprintf)
+AUTO_TRAMPOLINE_TRS(printf)
+AUTO_TRAMPOLINE_TRS(fprintf)
