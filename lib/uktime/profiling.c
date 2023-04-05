@@ -56,6 +56,10 @@ void print_profiling_results(bool print_avg, bool print_total)
 	DYN_TRAMPOLINE_FINI;
 }
 
+#define nl_strcmp(s1, s2)                                                      \
+	(s1 == NULL ? (s2 == NULL ? 0 : -s2[0])                                \
+		    : (s2 == NULL ? s1[0] : strcmp(s1, s2)))
+
 UK_COMP_PUBLIC_SECTION(".", "text")
 void print_profiling_results_grouped(bool print_avg, bool print_total)
 {
@@ -65,8 +69,7 @@ void print_profiling_results_grouped(bool print_avg, bool print_total)
 		char const *group_name = uk_prf_names[ig];
 
 		for (__sz i = 0; i < ig; i++) {
-			if (strcmp(group_name, uk_prf_names[i]) == 0) {
-				group_name = NULL;
+			if (nl_strcmp(group_name, uk_prf_names[i]) == 0) {
 				goto end_group_loop;
 			}
 		}
@@ -76,7 +79,7 @@ void print_profiling_results_grouped(bool print_avg, bool print_total)
 		bool has_multiple = false;
 
 		for (__sz i = ig + 1; i < uk_prf_id_count; i++) {
-			if (strcmp(group_name, uk_prf_names[i]) == 0) {
+			if (nl_strcmp(group_name, uk_prf_names[i]) == 0) {
 				group_count += uk_prf_counts[i];
 				group_tsc += uk_prf_tsc_delays[i];
 				has_multiple = true;
@@ -86,7 +89,7 @@ void print_profiling_results_grouped(bool print_avg, bool print_total)
 			continue;
 		}
 
-		if (needs_newline) {
+		if (needs_newline || has_multiple) {
 			needs_newline = false;
 			printf("\n");
 		}
@@ -95,7 +98,7 @@ void print_profiling_results_grouped(bool print_avg, bool print_total)
 
 		if (has_multiple) {
 			for (__sz i = ig; i < uk_prf_id_count; i++) {
-				if (strcmp(group_name, uk_prf_names[i]) == 0
+				if (nl_strcmp(group_name, uk_prf_names[i]) == 0
 				    && uk_prf_counts[i] != 0) {
 					printf("    ");
 					print_prf_line(uk_prf_counts[i],
