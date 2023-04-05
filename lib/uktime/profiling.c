@@ -89,7 +89,7 @@ void print_profiling_results_grouped(bool print_avg, bool print_total)
 			continue;
 		}
 
-		if (needs_newline || has_multiple) {
+		if (ig != 0 && (needs_newline || has_multiple)) {
 			needs_newline = false;
 			printf("\n");
 		}
