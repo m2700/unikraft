@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) __weak;
 #ifdef CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
 #define __SRC_LIBNAME__ libukboot_main
 #include <uk/auto-trampoline.h>
-AUTO_STATIC_TRAMPOLINE(main)
+AUTO_STATIC_TRAMPOLINE(main, int argc, char *argv[])
 #define main __tr_main
 #endif // CONFIG_LIBUKBOOT_INIT_EPT_ISOLATION
 
