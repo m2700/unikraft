@@ -12,6 +12,7 @@
 
 void print_profiling_results(bool print_avg, bool print_total);
 void print_profiling_results_grouped(bool print_avg, bool print_total);
+void uk_prf_clear(void);
 
 extern char const *uk_prf_names[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];
 extern __sz uk_prf_counts[CONFIG_LIBUKTIME_PROFILING_ARRAY_SIZE];

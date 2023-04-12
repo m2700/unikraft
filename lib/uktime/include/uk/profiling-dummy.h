@@ -11,3 +11,5 @@
 #define UK_PRF_ITER(name)
 
 #define UK_PRF_END(name)
+
+#define uk_prf_clear()
