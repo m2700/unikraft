@@ -68,8 +68,13 @@ void print_profiling_results_grouped(bool print_avg, bool print_total)
 	for (__sz ig = 0; ig < uk_prf_id_count; ig++) {
 		char const *group_name = uk_prf_names[ig];
 
+		if (uk_prf_counts[ig] == 0) {
+			continue;
+		}
+
 		for (__sz i = 0; i < ig; i++) {
-			if (nl_strcmp(group_name, uk_prf_names[i]) == 0) {
+			if (uk_prf_counts[i] > 0
+			    && nl_strcmp(group_name, uk_prf_names[i]) == 0) {
 				goto end_group_loop;
 			}
 		}
@@ -79,7 +84,8 @@ void print_profiling_results_grouped(bool print_avg, bool print_total)
 		bool has_multiple = false;
 
 		for (__sz i = ig + 1; i < uk_prf_id_count; i++) {
-			if (nl_strcmp(group_name, uk_prf_names[i]) == 0) {
+			if (uk_prf_counts[i] > 0
+			    && nl_strcmp(group_name, uk_prf_names[i]) == 0) {
 				group_count += uk_prf_counts[i];
 				group_tsc += uk_prf_tsc_delays[i];
 				has_multiple = true;
