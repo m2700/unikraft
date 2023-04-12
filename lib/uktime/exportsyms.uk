@@ -44,5 +44,6 @@ uk_prf_names
 uk_prf_tsc_delays
 uk_prf_counts
 uk_prf_id_count
+uk_prf_clear
 print_profiling_results
 print_profiling_results_grouped
